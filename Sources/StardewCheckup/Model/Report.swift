@@ -285,6 +285,35 @@ struct FriendGroup {
     var rows: [FriendRow]
 }
 
+// MARK: - Calendar
+
+struct CalendarEvent: Identifiable {
+    enum Kind { case birthday, festival, other }
+    let id = UUID()
+    var kind: Kind
+    var name: String
+    var startDay: Int
+    var endDay: Int
+    var url: URL? = nil
+    /// Birthday: gift given on the birthday this year. Festival: attended at least once.
+    var done: Bool = false
+    var note: String = ""
+    var isMultiDay: Bool { endDay > startDay }
+}
+
+struct CalendarData {
+    static let seasons = ["Spring", "Summer", "Fall", "Winter"]
+    var season: String      // current season
+    var day: Int
+    var year: Int
+    /// Events keyed by season name.
+    var events: [String: [CalendarEvent]]
+
+    func events(on day: Int, in season: String) -> [CalendarEvent] {
+        (events[season] ?? []).filter { day >= $0.startDay && day <= $0.endDay }
+    }
+}
+
 // MARK: - Overview numbers gathered while parsing
 
 struct Overview {
@@ -317,6 +346,7 @@ enum Block: Identifiable {
     case need(RichText, [DetailItem], ordered: Bool)        // <span class="need">Label<ol>...</ol></span>
     case list([DetailItem], ordered: Bool)                  // bare <ol class="outer">
     case friends([FriendGroup])                             // Social friendship progress
+    case calendar(CalendarData)                             // season grid with birthdays and festivals
 
     var id: String {
         switch self {
@@ -328,6 +358,7 @@ enum Block: Identifiable {
         case .need(let t, let items, _): return "d" + t.plain + items.map(\.sortKey).joined()
         case .list(let items, _): return "l" + items.map(\.sortKey).joined()
         case .friends(let groups): return "f" + groups.flatMap { $0.rows.map(\.sortKey) }.joined()
+        case .calendar(let c): return "c\(c.season)\(c.day)\(c.year)"
         }
     }
 }

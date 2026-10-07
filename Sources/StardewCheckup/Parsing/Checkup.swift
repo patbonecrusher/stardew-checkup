@@ -45,6 +45,7 @@ final class Checkup {
         sections.append(timed("parseStardrops") { parseStardrops() })
         sections.append(timed("parseFamily") { parseFamily() })
         sections.append(timed("parseSocial") { parseSocial() })
+        sections.append(timed("parseCalendar") { parseCalendar() })
         sections.append(timed("parseCooking") { parseCooking() })
         sections.append(timed("parseCrafting") { parseCrafting() })
         sections.append(timed("parseFishing") { parseFishing() })

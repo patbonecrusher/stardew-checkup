@@ -51,6 +51,10 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   season, weather, difficulty and base XP, marked caught / not caught /
   level-locked for your farmer, with season, weather and "only uncaught"
   filters and a "Now" button for the save's current season.
+- The Calendar section shows each season as a day grid with villager birthdays
+  (read from the save, so modded villagers appear), festivals and seasonal
+  forage windows, today highlighted, birthday gifts already given this year,
+  festivals attended before, and what's coming up.
 - The Books, Special Items & Powers section lists where every book and power
   comes from (wiki text), with have / missing status and an "only missing"
   filter.

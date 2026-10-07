@@ -157,6 +157,19 @@ enum PlainTextRenderer {
             return renderItems(items, ordered: ordered, indent: indent + 1)
         case .friends(let groups):
             return renderItems(groups.map(\.asDetailItem), ordered: false, indent: indent + 1)
+        case .calendar(let c):
+            var out = ""
+            for season in CalendarData.seasons {
+                let evs = (c.events[season] ?? []).sorted { $0.startDay < $1.startDay }
+                guard !evs.isEmpty else { continue }
+                out += pad + "  " + season + "\n"
+                for e in evs {
+                    let when = e.isMultiDay ? "\(e.startDay)–\(e.endDay)" : "\(e.startDay)"
+                    let mark = e.done ? (e.kind == .birthday ? " (gift given)" : " (attended)") : ""
+                    out += pad + "    \(when): \(e.name)\(mark)\n"
+                }
+            }
+            return out
         }
     }
 

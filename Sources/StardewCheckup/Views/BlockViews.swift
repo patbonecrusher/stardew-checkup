@@ -100,6 +100,8 @@ struct BlockView: View {
                 .padding(.bottom, 4)
         case .friends(let groups):
             FriendsView(groups: groups)
+        case .calendar(let data):
+            CalendarView(data: data)
         }
     }
 
