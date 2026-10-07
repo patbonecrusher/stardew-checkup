@@ -7,8 +7,8 @@ final class AppModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var saves: [SaveLoader.SaveEntry] = SaveLoader.discoverSaves()
-    /// True when the app is sandboxed and no saves-folder access has been granted yet.
-    var needsFolderGrant: Bool { SaveAccess.isSandboxed && !SaveAccess.hasFolderGrant }
+    /// True until the user has pointed the app at their Saves folder once.
+    var needsFolderGrant: Bool { !SaveAccess.hasFolderGrant }
     @Published var showAcknowledgements = false
 
     /// Output Preferences, persisted like the site's cookies.
@@ -49,6 +49,11 @@ final class AppModel: ObservableObject {
         let args = CommandLine.arguments
         if let i = args.firstIndex(of: "--open"), i + 1 < args.count {
             load(url: URL(fileURLWithPath: args[i + 1]))
+        }
+        // Test hook: `--remember-folder <path>` stores the folder grant without the panel.
+        if let i = args.firstIndex(of: "--remember-folder"), i + 1 < args.count {
+            SaveAccess.rememberFolder(URL(fileURLWithPath: args[i + 1], isDirectory: true))
+            refreshSaves()
         }
     }
 

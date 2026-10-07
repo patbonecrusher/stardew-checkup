@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Checkup for Stardew Valley</string>
 	<key>CFBundleExecutable</key>
 	<string>StardewCheckup</string>
 	<key>CFBundleIconFile</key>
@@ -14,21 +16,19 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>Checkup for Stardew Valley</string>
-	<key>CFBundleDisplayName</key>
-	<string>Checkup for Stardew Valley</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>1.1</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.utilities</string>
 </dict>
 </plist>

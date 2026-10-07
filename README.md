@@ -59,6 +59,9 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   section to view it on its own page, or "All Sections" for the full report.
 - Light and dark appearance both supported (follows the system setting).
 
+- On first launch the app asks you to point it at your Saves folder (usually
+  `~/.config/StardewValley/Saves`); it reads nothing until you do. The choice is
+  remembered, and "Change Saves Folder…" lets you pick another location.
 - Use the full save file named after your farmer plus an ID number
   (e.g. `Fred_148093307`), not `SaveGameInfo`.
 - Compressed Nintendo Switch saves are supported.

@@ -1,12 +1,13 @@
 import Foundation
 import AppKit
 
-/// File access that works inside the App Sandbox.
+/// Access to the Stardew Valley saves folder.
 ///
-/// A sandboxed app cannot read `~/.config/StardewValley/Saves` on its own. The user
-/// grants access once through an open panel; we keep a security-scoped bookmark so
-/// the grant survives relaunches. Outside the sandbox (e.g. `swift run`) everything
-/// falls back to direct access.
+/// The app never reads the saves folder until the user has pointed at it once through an
+/// open panel (which also lets people keep saves somewhere other than the default). The
+/// choice is stored as a bookmark so it survives relaunches, and it is security-scoped so
+/// the same code works inside the App Sandbox. Individual files chosen with ⌘O work
+/// regardless.
 enum SaveAccess {
     static var isSandboxed: Bool {
         ProcessInfo.processInfo.environment["APP_SANDBOX_CONTAINER_ID"] != nil
@@ -31,12 +32,9 @@ enum SaveAccess {
         return FileManager.default.homeDirectoryForCurrentUser
     }
 
-    /// The saves folder we are allowed to read: the bookmarked one if granted,
-    /// otherwise the default location (which only works outside the sandbox).
+    /// The saves folder the user has granted, if any.
     static var savesDirectory: URL? {
-        if let url = resolveBookmark(key: folderKey) { return url }
-        let def = defaultSavesDirectory
-        return FileManager.default.isReadableFile(atPath: def.path) ? def : nil
+        resolveBookmark(key: folderKey)
     }
 
     static var hasFolderGrant: Bool { resolveBookmark(key: folderKey) != nil }
@@ -58,11 +56,13 @@ enum SaveAccess {
     }
 
     private static func store(_ url: URL, key: String) {
-        do {
-            let data = try url.bookmarkData(options: [.withSecurityScope], includingResourceValuesForKeys: nil, relativeTo: nil)
+        // Security-scoped when possible (sandbox); a plain bookmark otherwise.
+        if let data = try? url.bookmarkData(options: [.withSecurityScope], includingResourceValuesForKeys: nil, relativeTo: nil) {
             UserDefaults.standard.set(data, forKey: key)
-        } catch {
-            NSLog("Could not create bookmark for \(url.path): \(error)")
+        } else if let data = try? url.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil) {
+            UserDefaults.standard.set(data, forKey: key)
+        } else {
+            NSLog("Could not create bookmark for \(url.path)")
         }
     }
 
@@ -70,7 +70,12 @@ enum SaveAccess {
     private static func resolveBookmark(key: String) -> URL? {
         guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
         var stale = false
-        guard let url = try? URL(resolvingBookmarkData: data, options: [.withSecurityScope], relativeTo: nil, bookmarkDataIsStale: &stale) else {
+        let url: URL
+        if let u = try? URL(resolvingBookmarkData: data, options: [.withSecurityScope], relativeTo: nil, bookmarkDataIsStale: &stale) {
+            url = u
+        } else if let u = try? URL(resolvingBookmarkData: data, options: [], relativeTo: nil, bookmarkDataIsStale: &stale) {
+            url = u
+        } else {
             return nil
         }
         if stale { store(url, key: key) }

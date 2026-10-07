@@ -109,9 +109,7 @@ struct ContentView: View {
             if model.saves.isEmpty {
                 Text(model.needsFolderGrant ? "Grant access to your Saves folder first" : "No saves found in ~/.config/StardewValley/Saves")
             }
-            if SaveAccess.isSandboxed {
-                Button(model.needsFolderGrant ? "Grant Access to Saves Folder…" : "Change Saves Folder…") { model.grantSavesFolder() }
-            }
+            Button(model.needsFolderGrant ? "Grant Access to Saves Folder…" : "Change Saves Folder…") { model.grantSavesFolder() }
             ForEach(model.saves) { save in
                 Button(save.name) { model.load(url: save.url) }
             }
@@ -167,14 +165,12 @@ struct ContentView: View {
                     HStack(spacing: 10) {
                         Button("Open Save File…") { model.presentOpenPanel() }
                             .keyboardShortcut(.defaultAction)
-                        if SaveAccess.isSandboxed {
-                            Button(model.needsFolderGrant ? "Grant Access to Saves Folder…" : "Change Saves Folder…") { model.grantSavesFolder() }
-                        }
+                        Button(model.needsFolderGrant ? "Grant Access to Saves Folder…" : "Change Saves Folder…") { model.grantSavesFolder() }
                     }
                     if model.needsFolderGrant {
                         HStack(alignment: .top, spacing: 6) {
                             Image(systemName: "lock.shield").foregroundStyle(Theme.accent)
-                            Text("To list your saves automatically and reload them while you play, grant the app access to your Saves folder once. Nothing is uploaded or modified; the app only reads save files.")
+                            Text("The app does not look at your files until you say so. Grant access to your Saves folder once to list your saves and reload them while you play. Nothing is uploaded or modified; the app only reads save files.")
                                 .font(.callout)
                         }
                     }
