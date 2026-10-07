@@ -1,0 +1,8 @@
+.build/
+build/
+*.xcodeproj
+.DS_Store
+.swiftpm/
+*.p12
+*.p8
+.release.env
