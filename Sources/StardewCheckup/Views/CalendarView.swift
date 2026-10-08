@@ -37,19 +37,19 @@ struct CalendarView: View {
             Label("festival", systemImage: "star.fill").foregroundStyle(Theme.accent)
             Label("gift given / attended", systemImage: "checkmark.circle.fill").foregroundStyle(Theme.yes)
         }
-        .font(.caption).foregroundStyle(Theme.secondaryText)
+        .font(.callout).foregroundStyle(Theme.secondaryText)
     }
 
     private var grid: some View {
-        let columns = Array(repeating: GridItem(.flexible(minimum: 90), spacing: 4), count: 7)
-        return VStack(spacing: 4) {
-            LazyVGrid(columns: columns, spacing: 4) {
+        let columns = Array(repeating: GridItem(.flexible(minimum: 130), spacing: 8), count: 7)
+        return VStack(spacing: 8) {
+            LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(weekdays, id: \.self) { d in
-                    Text(d).font(.caption.weight(.semibold)).foregroundStyle(Theme.secondaryText)
+                    Text(d).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.secondaryText)
                         .frame(maxWidth: .infinity)
                 }
             }
-            LazyVGrid(columns: columns, spacing: 4) {
+            LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(1...28, id: \.self) { day in
                     DayCell(day: day, events: data.events(on: day, in: season),
                             isToday: season == data.season && day == data.day,
@@ -67,38 +67,40 @@ private struct DayCell: View {
     let isPast: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text("\(day)")
-                    .font(.caption.weight(isToday ? .bold : .semibold)).monospacedDigit()
+                    .font(.title2.weight(isToday ? .bold : .semibold)).monospacedDigit()
                     .foregroundStyle(isToday ? Theme.accent : Theme.secondaryText)
                 Spacer()
                 if isToday {
-                    Text("today").font(.caption2.weight(.bold)).foregroundStyle(Theme.accent)
+                    Text("TODAY").font(.caption.weight(.bold)).foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Theme.accent.opacity(0.2), in: Capsule())
                 }
             }
             ForEach(events) { e in
-                HStack(spacing: 3) {
-                    Image(systemName: icon(e)).font(.system(size: 9)).foregroundStyle(color(e))
+                HStack(spacing: 5) {
+                    Image(systemName: icon(e)).font(.system(size: 13)).foregroundStyle(color(e))
                     if let url = e.url {
                         Link(e.name, destination: url).foregroundStyle(Theme.text)
                     } else {
                         Text(e.name).foregroundStyle(Theme.text)
                     }
                     if e.done {
-                        Image(systemName: "checkmark.circle.fill").font(.system(size: 9)).foregroundStyle(Theme.yes)
+                        Image(systemName: "checkmark.circle.fill").font(.system(size: 12)).foregroundStyle(Theme.yes)
                     }
                 }
-                .font(.caption)
+                .font(.body.weight(e.kind == .festival ? .semibold : .regular))
                 .lineLimit(2)
                 .help(tooltip(e))
             }
             Spacer(minLength: 0)
         }
-        .padding(6)
-        .frame(maxWidth: .infinity, minHeight: 64, alignment: .topLeading)
-        .background(background, in: RoundedRectangle(cornerRadius: 7))
-        .overlay(RoundedRectangle(cornerRadius: 7).stroke(isToday ? Theme.accent : Theme.border.opacity(0.25), lineWidth: isToday ? 2 : 1))
+        .padding(10)
+        .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
+        .background(background, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(isToday ? Theme.accent : Theme.border.opacity(0.25), lineWidth: isToday ? 3 : 1))
         .opacity(isPast ? 0.6 : 1)
     }
 
