@@ -7,6 +7,8 @@ achievements, Grandpa's evaluation, Community Center bundles, Ginger Island,
 Perfection, social relationships and more, listing exactly what is still
 missing.
 
+Website: https://patbonecrusher.github.io/stardew-checkup/
+
 ## Install
 
 ```sh
