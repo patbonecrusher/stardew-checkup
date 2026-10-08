@@ -347,6 +347,7 @@ enum Block: Identifiable {
     case list([DetailItem], ordered: Bool)                  // bare <ol class="outer">
     case friends([FriendGroup])                             // Social friendship progress
     case calendar(CalendarData)                             // season grid with birthdays and festivals
+    case characters(CharactersData)                         // villager reference pages
 
     var id: String {
         switch self {
@@ -359,6 +360,7 @@ enum Block: Identifiable {
         case .list(let items, _): return "l" + items.map(\.sortKey).joined()
         case .friends(let groups): return "f" + groups.flatMap { $0.rows.map(\.sortKey) }.joined()
         case .calendar(let c): return "c\(c.season)\(c.day)\(c.year)"
+        case .characters(let c): return "p\(c.season)\(c.day)\(c.year)\(c.statuses.count)"
         }
     }
 }

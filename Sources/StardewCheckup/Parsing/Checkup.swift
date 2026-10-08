@@ -20,6 +20,12 @@ final class Checkup {
     /// The host farmer element (`SaveGame > player`), looked up once.
     let hostPlayer: XNode
 
+    /// Host player's heart-event states keyed by the Social section's event id string
+    /// (e.g. "53|584059"), and per-villager friendship status; filled by `parseSocial`
+    /// and consumed by `parseCharacters`.
+    var hostEventStates: [String: MarkState] = [:]
+    var hostCharacterStatus: [String: CharacterStatus] = [:]
+
     /// Set via `--timing` to print per-section timings to stderr.
     static var timingEnabled = false
 
@@ -46,6 +52,7 @@ final class Checkup {
         sections.append(timed("parseFamily") { parseFamily() })
         sections.append(timed("parseSocial") { parseSocial() })
         sections.append(timed("parseCalendar") { parseCalendar() })
+        sections.append(timed("parseCharacters") { parseCharacters() })
         sections.append(timed("parseCooking") { parseCooking() })
         sections.append(timed("parseCrafting") { parseCrafting() })
         sections.append(timed("parseFishing") { parseFishing() })

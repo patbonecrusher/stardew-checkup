@@ -16,7 +16,7 @@ struct AcknowledgementsView: View {
                     }
                     Group {
                         Text("Stardew Valley Wiki").font(.headline)
-                        Text("Game reference data in the XP, fish and item guides (prices, difficulties, experience values, locations and sources) was compiled from the Stardew Valley Wiki, whose content is available under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 license.")
+                        Text("Game reference data in the XP, fish, item and character guides (prices, difficulties, experience values, locations, sources, schedules, gift tastes and heart-event conditions) was compiled from the Stardew Valley Wiki, whose content is available under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 license.")
                         Link("https://stardewvalleywiki.com/", destination: URL(string: "https://stardewvalleywiki.com/")!)
                     }
                     Group {

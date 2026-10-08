@@ -102,6 +102,8 @@ struct BlockView: View {
             FriendsView(groups: groups)
         case .calendar(let data):
             CalendarView(data: data)
+        case .characters(let data):
+            CharactersView(data: data)
         }
     }
 

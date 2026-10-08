@@ -146,8 +146,12 @@ final class AppModel: ObservableObject {
                     // `--scroll-to <anchor>` jumps to a section after loading (handy for testing).
                     let args = CommandLine.arguments
                     if let i = args.firstIndex(of: "--scroll-to"), i + 1 < args.count {
-                        let anchor = args[i + 1]
-                        self.selectedSection = anchor
+                        // "Section" or "Section/sub-anchor" (e.g. Characters/Characters_gifts).
+                        let parts = args[i + 1].split(separator: "/", maxSplits: 1).map(String.init)
+                        self.selectedSection = parts[0]
+                        if parts.count > 1 {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.scrollTarget = parts[1] }
+                        }
                     }
                 case .failure(let error):
                     if automatic {

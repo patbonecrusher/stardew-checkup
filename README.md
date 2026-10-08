@@ -57,6 +57,11 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   (read from the save, so modded villagers appear), festivals and seasonal
   forage windows, today highlighted, birthday gifts already given this year,
   festivals attended before, and what's coming up.
+- The Characters section has a page per villager: birthday, home and family,
+  where to find them (wiki schedules by season, weekday, weather and date, with
+  the one likely in effect today highlighted), loved / liked / disliked / hated
+  gifts, and every heart event with its trigger and seen / pending / missed
+  status from your save, plus hearts, gifts given this week and talked-to-today.
 - The Books, Special Items & Powers section lists where every book and power
   comes from (wiki text), with have / missing status and an "only missing"
   filter.

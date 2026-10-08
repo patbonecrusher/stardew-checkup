@@ -170,6 +170,18 @@ enum PlainTextRenderer {
                 }
             }
             return out
+        case .characters(let c):
+            var out = ""
+            for info in CharacterData.all {
+                let st = c.status(of: info.name)
+                out += pad + "  \(info.name): \(st.status), \(st.hearts)♥ (\(st.points) pts), birthday \(info.birthday.season) \(info.birthday.day), \(info.address)\n"
+                for e in info.heartEvents where !e.isMail {
+                    let state = CharactersView.state(of: e, in: st)
+                    let mark = state.map { $0 == .yes ? "seen" : ($0 == .imp ? "impossible" : "not seen") } ?? "untracked"
+                    out += pad + "    \(e.title) [\(mark)]: \(e.trigger)\n"
+                }
+            }
+            return out
         }
     }
 

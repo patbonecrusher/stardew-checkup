@@ -26,7 +26,7 @@ enum SectionGroup: String, CaseIterable, Identifiable {
         switch anchor {
         case "Summary", "Money", "Skills", "Skill_Mastery", "Quests", "Special_Orders", "Monster_Hunting", "Stardrops":
             return .progress
-        case "Home_and_Family", "Social", "Calendar", "Animal_Summary", "Forest_Neighbors":
+        case "Home_and_Family", "Social", "Calendar", "Characters", "Animal_Summary", "Forest_Neighbors":
             return .social
         case "Cooking", "Crafting", "Fishing", "Basic_Shipping", "Crop_Shipping", "Museum_Collection",
              "Books__Special_Items___Powers", "Secret_Notes":
@@ -53,6 +53,7 @@ enum SectionGroup: String, CaseIterable, Identifiable {
         case "Home_and_Family": return "house"
         case "Social": return "person.2"
         case "Calendar": return "calendar"
+        case "Characters": return "person.text.rectangle"
         case "Animal_Summary": return "pawprint"
         case "Forest_Neighbors": return "leaf"
         case "Cooking": return "fork.knife"

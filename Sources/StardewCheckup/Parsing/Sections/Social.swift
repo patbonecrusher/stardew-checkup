@@ -134,7 +134,10 @@ extension Checkup {
         var maxedTotal = 0
         let umid = info.umid(of: player)
         let pd = info.data[umid]!
+        let isHost = umid == info.farmerId
         var points: [String: Int] = [:]
+        var giftsThisWeek: [String: Int] = [:]
+        var talkedToday: Set<String> = []
         var listFam: [FriendRow] = []
         var listBach: [FriendRow] = []
         var listOther: [FriendRow] = []
@@ -168,6 +171,8 @@ extension Checkup {
                     if (npc[who]!.isDatable && n >= 2000) || n >= 2500 { maxedCount += 1 }
                 }
                 points[who] = n
+                giftsThisWeek[who] = num(item.text("value > Friendship > GiftsThisWeek"))
+                if item.text("value > Friendship > TalkedToToday") == "true" { talkedToday.insert(who) }
                 npc[who]!.relStatus = item.text("value > Friendship > Status")
                 let isRoommate = item.text("value > Friendship > RoommateMarriage") == "true"
                 if npc[who]!.relStatus == "Married" && isRoommate {
@@ -215,6 +220,7 @@ extension Checkup {
             if arr.id == "3910979" { extra = " (Jas & Vincent both)" }
             else if arr.id == "639373" { extra = " (Lewis & Marnie both)" }
             let state: MarkState = seen ? .yes : neg
+            if isHost { hostEventStates[arr.id] = state }
             return (" ".rt + Fmt.marker(jsNum(arr.hearts) + "♥" + extra, state),
                     FriendEvent(label: jsNum(arr.hearts) + "♥", state: state, note: extra.trimmingCharacters(in: .whitespaces)))
         }
@@ -265,6 +271,12 @@ extension Checkup {
                     : RichText(runs: [Run(text: "need \(2500 - pts) more", color: .no)])
             }
             row.text = entry + row.need
+            if isHost && !n.isChild {
+                hostCharacterStatus[who] = CharacterStatus(
+                    name: who, isMet: points[who] != nil, hearts: hearts, points: pts, maxHearts: row.maxHearts,
+                    lockedFrom: row.lockedFrom, status: n.relStatus, isDatable: n.isDatable, need: row.need,
+                    giftsThisWeek: giftsThisWeek[who] ?? 0, talkedToday: talkedToday.contains(who))
+            }
             if who == spouse {
                 listFam.append(row)
             } else if n.isDatable {
@@ -279,6 +291,7 @@ extension Checkup {
             for (who, ids) in polyamory {
                 let seen = ids.contains { pd.hasEvent($0) }
                 let state: MarkState = seen ? .yes : (hasNPCSpouse ? .imp : .no)
+                if isHost { hostEventStates[ids.joined(separator: "|")] = state }
                 listPoly.append(FriendRow(name: who, url: nil, status: "", hearts: nil,
                                           events: [FriendEvent(label: "10♥", state: state, note: "")],
                                           text: "\(who): ".rt + Fmt.marker("10♥", state)))
