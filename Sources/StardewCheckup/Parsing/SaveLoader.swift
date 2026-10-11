@@ -170,6 +170,23 @@ enum PlainTextRenderer {
                 }
             }
             return out
+        case .eventPlan(let e):
+            var out = ""
+            for r in e.rows where !r.isComplete {
+                out += pad + "  \(r.name): \(r.hearts)♥ (\(r.points) pts), \(r.seenCount)/\(r.totalTracked) events seen\n"
+                for st in r.steps {
+                    let kind: String
+                    switch st.kind {
+                    case .ready: kind = "READY"
+                    case .locked: kind = "need \(st.pointsNeeded) pts (~\(st.giftsNeeded) × \(st.bestGift ?? "loved gift"))"
+                    case .bouquet: kind = "give a bouquet first"
+                    case .marriage: kind = "requires marriage"
+                    case .impossible: kind = "impossible"
+                    }
+                    out += pad + "    \(st.title) [\(kind)]: \(st.trigger)\n"
+                }
+            }
+            return out
         case .giftPlan(let g):
             var out = pad + "  \(g.weekday); gift week resets in \(g.daysUntilReset) day(s); \(g.ownedCount) distinct giftable items owned\n"
             for r in g.rows {

@@ -62,6 +62,16 @@ struct CharacterStatus {
     var birthdayGiftedThisYear = false
     /// Social-section event key → seen state.
     var eventStates: [String: MarkState] = [:]
+
+    /// Seen / not seen / impossible for a wiki heart event; nil when the save does not track it.
+    func state(of event: CharacterInfo.HeartEvent) -> MarkState? {
+        guard !event.idKeys.isEmpty else { return nil }
+        let states = event.idKeys.compactMap { eventStates[$0] }
+        guard states.count == event.idKeys.count else { return nil }
+        if states.allSatisfy({ $0 == .yes }) { return .yes }
+        if states.contains(.imp) { return .imp }
+        return .no
+    }
 }
 
 /// Payload of the Characters section: today's context plus per-villager save status.
@@ -143,4 +153,42 @@ struct GiftPlanData {
     var daysUntilReset: Int      // days until next Monday
     var rows: [GiftPlanRow] = []
     var ownedCount = 0
+}
+
+/// One thing to do towards a villager's heart events.
+struct EventStep: Identifiable {
+    enum Kind { case ready, locked, bouquet, marriage, impossible }
+    let id = UUID()
+    var kind: Kind
+    var hearts: Int?
+    var title: String
+    var trigger: String
+    var anchor: String
+    /// For `.locked`: friendship still needed and roughly how many of your best gift that is.
+    var pointsNeeded = 0
+    var giftsNeeded = 0
+    var bestGift: String? = nil
+    var bestGiftPoints = 0
+}
+
+struct EventPlanRow: Identifiable {
+    let name: String
+    var hearts = 0
+    var points = 0
+    var maxHearts = 10
+    var lockedFrom: Int? = nil
+    var status = "Unmet"
+    var isMet = false
+    var isMarriageCandidate = false
+    var steps: [EventStep] = []
+    var seenCount = 0
+    var totalTracked = 0
+    var id: String { name }
+    var readyCount: Int { steps.filter { $0.kind == .ready }.count }
+    var isComplete: Bool { !steps.contains { $0.kind == .ready || $0.kind == .locked || $0.kind == .bouquet || $0.kind == .marriage } }
+}
+
+struct EventPlanData {
+    var rows: [EventPlanRow] = []
+    var spouse: String? = nil
 }

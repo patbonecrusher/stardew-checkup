@@ -106,6 +106,8 @@ struct BlockView: View {
             CharactersView(data: data)
         case .giftPlan(let data):
             GiftPlannerView(data: data)
+        case .eventPlan(let data):
+            EventPlannerView(data: data)
         }
     }
 

@@ -20,12 +20,7 @@ struct CharactersView: View {
 
     /// Seen/not seen/impossible for a wiki heart event, from the Social section's event table.
     static func state(of event: CharacterInfo.HeartEvent, in status: CharacterStatus) -> MarkState? {
-        guard !event.idKeys.isEmpty else { return nil }
-        let states = event.idKeys.compactMap { status.eventStates[$0] }
-        guard states.count == event.idKeys.count else { return nil }
-        if states.allSatisfy({ $0 == .yes }) { return .yes }
-        if states.contains(.imp) { return .imp }
-        return .no
+        status.state(of: event)
     }
 
     private var roster: [CharacterInfo] {
@@ -165,7 +160,7 @@ private struct CharacterPage: View {
                         tag("Can be a roommate", "house.circle.fill", Theme.heart)
                     }
                     if let spouse = data.spouse, spouse == info.name {
-                        tag("Your spouse", "rings.fill", Theme.yes)
+                        tag("Your spouse", "heart.circle.fill", Theme.yes)
                     }
                 }
                 .font(.title.weight(.bold)).fontDesign(.rounded)

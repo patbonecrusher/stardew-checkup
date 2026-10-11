@@ -67,6 +67,10 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   loved / liked items you already own for each of them, found in your
   inventory, chests and fridges, with where they are kept. The same ideas
   appear on each character page.
+- The Event Planner is a to-do list for heart events: per villager, the
+  events you can trigger right now, the ones that need more hearts (with the
+  points still needed and how many of your best gift that is), and the ones
+  waiting on a bouquet or a wedding.
 - The Books, Special Items & Powers section lists where every book and power
   comes from (wiki text), with have / missing status and an "only missing"
   filter.
