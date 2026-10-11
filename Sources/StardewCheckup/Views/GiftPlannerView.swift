@@ -92,15 +92,15 @@ private struct GiftPlanRowView: View {
             .frame(width: 190, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 5) {
-                if row.suggestions.isEmpty {
-                    Text("Nothing you own is loved or liked.").font(.callout).foregroundStyle(Theme.secondaryText)
+                if !row.suggestions.loves.isEmpty {
+                    tierRow("Loves", "heart.fill", Theme.heart, row.suggestions.loves, showAll: true)
                 } else {
-                    if !row.suggestions.loves.isEmpty {
-                        tierRow("Loves", "heart.fill", Theme.heart, row.suggestions.loves, showAll: true)
-                    }
-                    if !row.suggestions.likes.isEmpty {
-                        tierRow("Likes", "hand.thumbsup.fill", Theme.yes, row.suggestions.likes, showAll: showAllLikes || row.suggestions.loves.isEmpty)
-                    }
+                    wishList
+                }
+                if !row.suggestions.likes.isEmpty {
+                    tierRow("Likes", "hand.thumbsup.fill", Theme.yes, row.suggestions.likes, showAll: showAllLikes || row.suggestions.loves.isEmpty)
+                } else if row.suggestions.loves.isEmpty {
+                    Text("Nothing you own is liked either.").font(.caption).foregroundStyle(Theme.secondaryText)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -109,6 +109,33 @@ private struct GiftPlanRowView: View {
         .background(Theme.panelAlt.opacity(row.birthdayIn == 0 ? 0.9 : 0.55), in: RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(row.birthdayIn == 0 ? Theme.heart.opacity(0.6) : Color.clear, lineWidth: 1))
         .opacity(row.slotsLeft == 0 ? 0.6 : 1)
+    }
+
+    /// Shown when you own no loved item: what they would love, to cook, buy or find.
+    private var wishList: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Label("Loves", systemImage: "heart").font(.caption.weight(.semibold)).foregroundStyle(Theme.secondaryText).frame(width: 58, alignment: .leading)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("none owned; they would love:").font(.caption).foregroundStyle(Theme.secondaryText)
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 260), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
+                    ForEach(row.lovedItems, id: \.self) { item in
+                        HStack(spacing: 4) {
+                            Image(systemName: "heart").font(.system(size: 9)).foregroundStyle(Theme.secondaryText)
+                            if let url = wikify(item).runs.first?.url {
+                                Link(item, destination: url).foregroundStyle(Theme.secondaryText)
+                            } else {
+                                Text(item).foregroundStyle(Theme.secondaryText)
+                            }
+                        }
+                        .font(.callout).lineLimit(1)
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .overlay(Capsule().stroke(Theme.border.opacity(0.35), lineWidth: 1))
+                    }
+                }
+                Text("plus the universal loves: Pearl, Rabbit's Foot, Prismatic Shard, Golden Pumpkin, Magic Rock Candy, Stardrop Tea")
+                    .font(.caption2).foregroundStyle(Theme.secondaryText)
+            }
+        }
     }
 
     private var slots: some View {

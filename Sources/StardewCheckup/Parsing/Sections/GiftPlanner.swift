@@ -45,6 +45,7 @@ extension Checkup {
             }
             if let g = lastGift[info.name], g.year == year, g.season == season, g.day == day { row.giftedToday = true }
             row.suggestions = hostGiftSuggestions[info.name] ?? GiftSuggestions()
+            row.lovedItems = info.gifts.love.items
             data.rows.append(row)
         }
 

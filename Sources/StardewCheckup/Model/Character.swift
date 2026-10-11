@@ -121,6 +121,8 @@ struct GiftPlanRow: Identifiable {
     var birthdayIn: Int? = nil
     var birthdayGifted = false
     var suggestions = GiftSuggestions()
+    /// The villager's own loved items (not the universal ones), for when you own none.
+    var lovedItems: [String] = []
     var id: String { name }
     /// Spouses take one gift a day; everyone else two a week (a birthday gift fits in the same limit).
     var slotsLeft: Int { isSpouse ? (giftedToday ? 0 : 1) : max(0, 2 - giftsThisWeek) }
