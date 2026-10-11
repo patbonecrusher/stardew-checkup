@@ -40,6 +40,7 @@ extension Checkup {
                 st.birthdayGiftedThisYear = true
             }
             data.statuses[info.name] = st
+            data.suggestions[info.name] = hostGiftSuggestions[info.name] ?? GiftSuggestions()
             if st.isMet { met += 1 }
             if st.need.plain.hasPrefix("MAX") { maxed += 1 }
             if info.birthday.season == season {

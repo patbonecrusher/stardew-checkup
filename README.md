@@ -62,6 +62,11 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   the one likely in effect today highlighted), loved / liked / disliked / hated
   gifts, and every heart event with its trigger and seen / pending / missed
   status from your save, plus hearts, gifts given this week and talked-to-today.
+- The Gift Planner shows who can still take a gift this week (two per villager,
+  reset on Monday; one a day for a spouse), birthdays coming up, and which
+  loved / liked items you already own for each of them, found in your
+  inventory, chests and fridges, with where they are kept. The same ideas
+  appear on each character page.
 - The Books, Special Items & Powers section lists where every book and power
   comes from (wiki text), with have / missing status and an "only missing"
   filter.

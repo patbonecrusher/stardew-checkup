@@ -170,6 +170,17 @@ enum PlainTextRenderer {
                 }
             }
             return out
+        case .giftPlan(let g):
+            var out = pad + "  \(g.weekday); gift week resets in \(g.daysUntilReset) day(s); \(g.ownedCount) distinct giftable items owned\n"
+            for r in g.rows {
+                var line = pad + "  \(r.name): \(r.giftsThisWeek)/2 gifts this week, \(r.hearts)♥"
+                if r.isMaxed { line += " (maxed)" }
+                if let b = r.birthdayIn { line += b == 0 ? " BIRTHDAY TODAY" : " birthday in \(b) day(s)" }
+                out += line + "\n"
+                if !r.suggestions.loves.isEmpty { out += pad + "    loves: " + r.suggestions.loves.map { "\($0.name) ×\($0.count)" }.joined(separator: ", ") + "\n" }
+                if !r.suggestions.likes.isEmpty { out += pad + "    likes: " + r.suggestions.likes.prefix(12).map { "\($0.name) ×\($0.count)" }.joined(separator: ", ") + "\n" }
+            }
+            return out
         case .characters(let c):
             var out = ""
             for info in CharacterData.all {

@@ -25,6 +25,14 @@ final class Checkup {
     /// and consumed by `parseCharacters`.
     var hostEventStates: [String: MarkState] = [:]
     var hostCharacterStatus: [String: CharacterStatus] = [:]
+    /// Giftable items the host owns (inventory, chests, fridges), filled lazily.
+    lazy var hostOwnedItems: [String: OwnedItem] = collectOwnedItems()
+    /// Loved / liked owned items per villager, computed once.
+    lazy var hostGiftSuggestions: [String: GiftSuggestions] = {
+        var out: [String: GiftSuggestions] = [:]
+        for info in CharacterData.all { out[info.name] = giftSuggestions(for: info, owned: hostOwnedItems) }
+        return out
+    }()
 
     /// Set via `--timing` to print per-section timings to stderr.
     static var timingEnabled = false
@@ -53,6 +61,7 @@ final class Checkup {
         sections.append(timed("parseSocial") { parseSocial() })
         sections.append(timed("parseCalendar") { parseCalendar() })
         sections.append(timed("parseCharacters") { parseCharacters() })
+        sections.append(timed("parseGiftPlanner") { parseGiftPlanner() })
         sections.append(timed("parseCooking") { parseCooking() })
         sections.append(timed("parseCrafting") { parseCrafting() })
         sections.append(timed("parseFishing") { parseFishing() })

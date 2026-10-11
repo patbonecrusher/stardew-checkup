@@ -348,6 +348,7 @@ enum Block: Identifiable {
     case friends([FriendGroup])                             // Social friendship progress
     case calendar(CalendarData)                             // season grid with birthdays and festivals
     case characters(CharactersData)                         // villager reference pages
+    case giftPlan(GiftPlanData)                             // weekly gift planner
 
     var id: String {
         switch self {
@@ -361,6 +362,7 @@ enum Block: Identifiable {
         case .friends(let groups): return "f" + groups.flatMap { $0.rows.map(\.sortKey) }.joined()
         case .calendar(let c): return "c\(c.season)\(c.day)\(c.year)"
         case .characters(let c): return "p\(c.season)\(c.day)\(c.year)\(c.statuses.count)"
+        case .giftPlan(let g): return "g\(g.weekday)\(g.rows.count)\(g.ownedCount)"
         }
     }
 }

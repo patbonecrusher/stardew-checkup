@@ -254,10 +254,27 @@ private struct CharacterPage: View {
             } else {
                 Text("Not met yet.").foregroundStyle(Theme.no)
             }
+            if let ideas = data.suggestions[info.name], !ideas.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Gift ideas from what you own").font(.caption.weight(.semibold)).foregroundStyle(Theme.secondaryText)
+                    if !ideas.loves.isEmpty { ideaRow("Loves", "heart.fill", Theme.heart, ideas.loves) }
+                    if !ideas.likes.isEmpty { ideaRow("Likes", "hand.thumbsup.fill", Theme.yes, Array(ideas.likes.prefix(10))) }
+                }
+                .padding(.top, 2)
+            }
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.panelAlt.opacity(0.6), in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private func ideaRow(_ title: String, _ symbol: String, _ color: Color, _ items: [GiftSuggestion]) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Label(title, systemImage: symbol).font(.caption.weight(.semibold)).foregroundStyle(color).frame(width: 58, alignment: .leading)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 260), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
+                ForEach(items) { GiftChip(suggestion: $0, color: color) }
+            }
+        }
     }
 
     private var statusColor: Color {

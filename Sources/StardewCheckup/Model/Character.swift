@@ -73,6 +73,60 @@ struct CharactersData {
     var isRaining = false
     var spouse: String? = nil
     var statuses: [String: CharacterStatus] = [:]
+    /// Loved / liked items the host owns, per villager.
+    var suggestions: [String: GiftSuggestions] = [:]
 
     func status(of name: String) -> CharacterStatus { statuses[name] ?? CharacterStatus(name: name) }
+}
+
+/// One item the host owns that a villager loves or likes.
+struct GiftSuggestion: Identifiable {
+    let name: String
+    let count: Int
+    let bestQuality: Int
+    let places: String
+    let inInventory: Bool
+    var id: String { name }
+
+    init(item: OwnedItem) {
+        name = item.name
+        count = item.count
+        bestQuality = item.bestQuality
+        places = item.placeSummary
+        inInventory = item.places["Inventory"] != nil
+    }
+}
+
+struct GiftSuggestions {
+    var loves: [GiftSuggestion] = []
+    var likes: [GiftSuggestion] = []
+    var isEmpty: Bool { loves.isEmpty && likes.isEmpty }
+}
+
+/// One villager in the weekly gift planner.
+struct GiftPlanRow: Identifiable {
+    let name: String
+    var hearts = 0
+    var maxHearts = 10
+    var lockedFrom: Int? = nil
+    var isMet = false
+    var isMaxed = false
+    var isSpouse = false
+    var giftsThisWeek = 0
+    var giftedToday = false
+    var talkedToday = false
+    /// Days until the villager's birthday (0 = today), when within the next week.
+    var birthdayIn: Int? = nil
+    var birthdayGifted = false
+    var suggestions = GiftSuggestions()
+    var id: String { name }
+    /// Spouses take one gift a day; everyone else two a week (a birthday gift fits in the same limit).
+    var slotsLeft: Int { isSpouse ? (giftedToday ? 0 : 1) : max(0, 2 - giftsThisWeek) }
+}
+
+struct GiftPlanData {
+    var weekday: String
+    var daysUntilReset: Int      // days until next Monday
+    var rows: [GiftPlanRow] = []
+    var ownedCount = 0
 }
