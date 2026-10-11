@@ -17,6 +17,8 @@ struct OwnedItem {
     /// Where it is kept → count there.
     var places: [String: Int] = [:]
 
+    /// True when every copy is forage lying on the ground rather than something you hold.
+    var onlyOnGround: Bool { !places.isEmpty && places.keys.allSatisfy { $0.hasPrefix("Ground") } }
     var placeSummary: String {
         places.sorted { $0.value == $1.value ? $0.key < $1.key : $0.value > $1.value }
             .map { "\($0.key) ×\($0.value)" }.joined(separator: ", ")
@@ -169,7 +171,8 @@ extension Checkup {
         var owned: [String: OwnedItem] = [:]
         let giftable: Set<String> = ["Object", "ColoredObject"]
         func add(_ item: XNode, place: String) {
-            guard giftable.contains(item.attr("\(info.nsPrefix):type") ?? "") else { return }
+            let type = item.attr("\(info.nsPrefix):type") ?? (item.name == "Object" ? "Object" : "")
+            guard giftable.contains(type) else { return }
             let name = item.childText("name")
             let stack = max(1, num(item.childText("stack")))
             guard !name.isEmpty, item.childText("isRecipe") != "true", item.childText("questItem") != "true" else { return }
@@ -209,6 +212,13 @@ extension Checkup {
         for fridge in doc.find("fridge") where !fridge.find("items > Item").isEmpty {
             for item in fridge.find("items > Item") { add(item, place: "Fridge (\(locationName(of: fridge)))") }
         }
+        // Forage spawned on the ground today is as good as owned: it only takes a walk.
+        for loc in doc.find("locations > GameLocation") {
+            let name = loc.childText("name")
+            for obj in loc.find("objects > item > value > Object") where obj.childText("isSpawnedObject") == "true" {
+                add(obj, place: "Ground (\(name))")
+            }
+        }
         return owned
     }
 
@@ -225,6 +235,7 @@ extension Checkup {
         }
         func order(_ a: GiftSuggestion, _ b: GiftSuggestion) -> Bool {
             if a.inInventory != b.inInventory { return a.inInventory }
+            if a.onlyOnGround != b.onlyOnGround { return !a.onlyOnGround }
             if a.count != b.count { return a.count > b.count }
             return a.name < b.name
         }

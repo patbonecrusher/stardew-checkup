@@ -86,6 +86,7 @@ struct GiftSuggestion: Identifiable {
     let bestQuality: Int
     let places: String
     let inInventory: Bool
+    let onlyOnGround: Bool
     var id: String { name }
 
     init(item: OwnedItem) {
@@ -94,6 +95,7 @@ struct GiftSuggestion: Identifiable {
         bestQuality = item.bestQuality
         places = item.placeSummary
         inInventory = item.places["Inventory"] != nil
+        onlyOnGround = item.onlyOnGround
     }
 }
 

@@ -40,7 +40,7 @@ struct GiftPlannerView: View {
             .toggleStyle(.checkbox).font(.callout)
             HStack(spacing: 6) {
                 Image(systemName: "info.circle").foregroundStyle(Theme.secondaryText)
-                Text("Ideas come from your inventory, chests and fridges. Loved gifts give 80 friendship, liked 45; the birthday multiplier is 8×. Stardrop Tea is loved by everyone and does not count towards the two-per-week limit.")
+                Text("Ideas come from your inventory (backpack icon), chests and fridges (box), and forage lying on the ground today (leaf). Loved gifts give 80 friendship, liked 45; the birthday multiplier is 8×. Stardrop Tea is loved by everyone and does not count towards the two-per-week limit.")
                     .font(.caption).foregroundStyle(Theme.secondaryText)
             }
             if rows.isEmpty {
@@ -154,8 +154,8 @@ struct GiftChip: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: suggestion.inInventory ? "backpack.fill" : "shippingbox")
-                .font(.system(size: 9)).foregroundStyle(suggestion.inInventory ? color : Theme.secondaryText)
+            Image(systemName: suggestion.inInventory ? "backpack.fill" : (suggestion.onlyOnGround ? "leaf.fill" : "shippingbox"))
+                .font(.system(size: 9)).foregroundStyle(suggestion.inInventory ? color : (suggestion.onlyOnGround ? Theme.yes : Theme.secondaryText))
             if let url = wikify(suggestion.name).runs.first?.url {
                 Link(suggestion.name, destination: url).foregroundStyle(Theme.text)
             } else {
@@ -171,6 +171,6 @@ struct GiftChip: View {
         .font(.callout).lineLimit(1)
         .padding(.horizontal, 8).padding(.vertical, 3)
         .background(color.opacity(0.1), in: Capsule())
-        .help((suggestion.inInventory ? "In your inventory. " : "") + "Kept in: " + suggestion.places)
+        .help((suggestion.inInventory ? "In your inventory. " : (suggestion.onlyOnGround ? "Forage on the ground today. " : "")) + "Found in: " + suggestion.places)
     }
 }

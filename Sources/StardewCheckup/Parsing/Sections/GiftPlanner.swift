@@ -56,7 +56,7 @@ extension Checkup {
         cell.summary.append(.result(RichText("It is \(data.weekday): the gift week resets in \(data.daysUntilReset) day(s) (gifts given reset every Monday).")))
         cell.summary.append(.result(RichText("\(open.count) villager(s) below max hearts can still take a gift this week; \(met.count - open.count) are done or maxed.")))
         if !open.isEmpty {
-            cell.summary.append(.result(RichText("From what you own, \(withLove.count) could get a loved gift and another \(withLike.count) a liked gift (\(hostOwnedItems.count) distinct giftable items found in your inventory, chests and fridges).")))
+            cell.summary.append(.result(RichText("From what you own, \(withLove.count) could get a loved gift and another \(withLike.count) a liked gift (\(hostOwnedItems.count) distinct giftable items found in your inventory, chests, fridges and on the ground).")))
         }
         let birthdays = data.rows.filter { $0.birthdayIn != nil }.sorted { $0.birthdayIn! < $1.birthdayIn! }
         if !birthdays.isEmpty {
