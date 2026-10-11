@@ -228,12 +228,13 @@ extension Checkup {
         var likes: [GiftSuggestion] = []
         for item in owned.values {
             switch GiftTastes.taste(of: item, for: info) {
-            case .love: loves.append(GiftSuggestion(item: item))
-            case .like: likes.append(GiftSuggestion(item: item))
+            case .love: loves.append(GiftSuggestion(item: item, taste: .love))
+            case .like: likes.append(GiftSuggestion(item: item, taste: .like))
             default: break
             }
         }
         func order(_ a: GiftSuggestion, _ b: GiftSuggestion) -> Bool {
+            if a.points() != b.points() { return a.points() > b.points() }
             if a.inInventory != b.inInventory { return a.inInventory }
             if a.onlyOnGround != b.onlyOnGround { return !a.onlyOnGround }
             if a.count != b.count { return a.count > b.count }

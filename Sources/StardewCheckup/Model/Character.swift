@@ -87,15 +87,25 @@ struct GiftSuggestion: Identifiable {
     let places: String
     let inInventory: Bool
     let onlyOnGround: Bool
+    let taste: GiftTaste
     var id: String { name }
 
-    init(item: OwnedItem) {
+    init(item: OwnedItem, taste: GiftTaste) {
         name = item.name
         count = item.count
         bestQuality = item.bestQuality
         places = item.placeSummary
         inInventory = item.places["Inventory"] != nil
         onlyOnGround = item.onlyOnGround
+        self.taste = taste
+    }
+
+    /// Friendship points for the best copy you own: 80 loved / 45 liked, ×1.1 silver, ×1.25 gold,
+    /// ×1.5 iridium, and ×8 on the villager's birthday.
+    func points(birthday: Bool = false) -> Int {
+        let base: Double = taste == .love ? 80 : 45
+        let quality: Double = bestQuality >= 4 ? 1.5 : (bestQuality >= 2 ? 1.25 : (bestQuality >= 1 ? 1.1 : 1))
+        return Int((base * quality * (birthday ? 8 : 1)).rounded(.down))
     }
 }
 

@@ -40,7 +40,7 @@ struct GiftPlannerView: View {
             .toggleStyle(.checkbox).font(.callout)
             HStack(spacing: 6) {
                 Image(systemName: "info.circle").foregroundStyle(Theme.secondaryText)
-                Text("Ideas come from your inventory (backpack icon), chests and fridges (box), and forage lying on the ground today (leaf). A star is the best quality you own: grey silver, orange gold, purple iridium. Loved gifts give 80 friendship, liked 45; the birthday multiplier is 8×. Stardrop Tea is loved by everyone and does not count towards the two-per-week limit.")
+                Text("Ideas come from your inventory (backpack icon), chests and fridges (box), and forage lying on the ground today (leaf). A star is the best quality you own: grey silver, orange gold, purple iridium. Each chip shows the friendship it gives (80 loved / 45 liked, more for quality, ×8 on a birthday) and ideas are sorted by that. Stardrop Tea is loved by everyone and does not count towards the two-per-week limit.")
                     .font(.caption).foregroundStyle(Theme.secondaryText)
             }
             if rows.isEmpty {
@@ -117,7 +117,7 @@ private struct GiftPlanRowView: View {
             Label("Loves", systemImage: "heart").font(.caption.weight(.semibold)).foregroundStyle(Theme.secondaryText).frame(width: 58, alignment: .leading)
             VStack(alignment: .leading, spacing: 3) {
                 Text("none owned; they would love:").font(.caption).foregroundStyle(Theme.secondaryText)
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 260), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 200, maximum: 320), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
                     ForEach(row.lovedItems, id: \.self) { item in
                         HStack(spacing: 4) {
                             Image(systemName: "heart").font(.system(size: 9)).foregroundStyle(Theme.secondaryText)
@@ -162,9 +162,9 @@ private struct GiftPlanRowView: View {
         let visible = showAll ? items : Array(items.prefix(limit))
         return HStack(alignment: .firstTextBaseline, spacing: 6) {
             Label(title, systemImage: symbol).font(.caption.weight(.semibold)).foregroundStyle(color).frame(width: 58, alignment: .leading)
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 260), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 200, maximum: 320), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
                 ForEach(visible) { s in
-                    GiftChip(suggestion: s, color: color)
+                    GiftChip(suggestion: s, color: color, birthday: row.birthdayIn == 0)
                 }
                 if !showAll && items.count > limit {
                     Button("+\(items.count - limit) more") { showAllLikes = true }
@@ -178,6 +178,7 @@ private struct GiftPlanRowView: View {
 struct GiftChip: View {
     let suggestion: GiftSuggestion
     let color: Color
+    var birthday = false
 
     private var qualityText: String {
         switch suggestion.bestQuality {
@@ -198,6 +199,7 @@ struct GiftChip: View {
                 Text(suggestion.name)
             }
             Text("×\(suggestion.count)").font(.caption).monospacedDigit().foregroundStyle(Theme.secondaryText)
+            Text("+\(suggestion.points(birthday: birthday))").font(.caption.weight(.semibold)).monospacedDigit().foregroundStyle(color)
             if suggestion.bestQuality >= 4 {
                 Image(systemName: "star.fill").font(.system(size: 8)).foregroundStyle(Color.purple)
             } else if suggestion.bestQuality >= 2 {
@@ -206,9 +208,9 @@ struct GiftChip: View {
                 Image(systemName: "star.fill").font(.system(size: 8)).foregroundStyle(Color.gray)
             }
         }
-        .font(.callout).lineLimit(1)
+        .font(.callout).lineLimit(1).fixedSize()
         .padding(.horizontal, 8).padding(.vertical, 3)
         .background(color.opacity(0.1), in: Capsule())
-        .help(qualityText + (suggestion.inInventory ? "In your inventory. " : (suggestion.onlyOnGround ? "Forage on the ground today. " : "")) + "Found in: " + suggestion.places)
+        .help("+\(suggestion.points(birthday: birthday)) friendship with the best copy. " + qualityText + (suggestion.inInventory ? "In your inventory. " : (suggestion.onlyOnGround ? "Forage on the ground today. " : "")) + "Found in: " + suggestion.places)
     }
 }

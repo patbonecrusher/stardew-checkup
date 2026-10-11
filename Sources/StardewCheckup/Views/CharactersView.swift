@@ -271,7 +271,7 @@ private struct CharacterPage: View {
     private func ideaRow(_ title: String, _ symbol: String, _ color: Color, _ items: [GiftSuggestion]) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             Label(title, systemImage: symbol).font(.caption.weight(.semibold)).foregroundStyle(color).frame(width: 58, alignment: .leading)
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 260), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 200, maximum: 320), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
                 ForEach(items) { GiftChip(suggestion: $0, color: color) }
             }
         }
@@ -475,7 +475,7 @@ private struct GiftTierView: View {
                     Text(note).font(.caption).italic().foregroundStyle(Theme.secondaryText).padding(.leading, 16)
                 }
                 if !tier.items.isEmpty {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 260), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 200, maximum: 320), spacing: 6, alignment: .leading)], alignment: .leading, spacing: 4) {
                         ForEach(tier.items, id: \.self) { item in
                             HStack(spacing: 4) {
                                 Circle().fill(color).frame(width: 6, height: 6)
