@@ -40,7 +40,7 @@ struct GiftPlannerView: View {
             .toggleStyle(.checkbox).font(.callout)
             HStack(spacing: 6) {
                 Image(systemName: "info.circle").foregroundStyle(Theme.secondaryText)
-                Text("Ideas come from your inventory (backpack icon), chests and fridges (box), and forage lying on the ground today (leaf). Loved gifts give 80 friendship, liked 45; the birthday multiplier is 8×. Stardrop Tea is loved by everyone and does not count towards the two-per-week limit.")
+                Text("Ideas come from your inventory (backpack icon), chests and fridges (box), and forage lying on the ground today (leaf). A star is the best quality you own: grey silver, orange gold, purple iridium. Loved gifts give 80 friendship, liked 45; the birthday multiplier is 8×. Stardrop Tea is loved by everyone and does not count towards the two-per-week limit.")
                     .font(.caption).foregroundStyle(Theme.secondaryText)
             }
             if rows.isEmpty {
@@ -179,6 +179,15 @@ struct GiftChip: View {
     let suggestion: GiftSuggestion
     let color: Color
 
+    private var qualityText: String {
+        switch suggestion.bestQuality {
+        case 4...: return "Best quality owned: iridium. "
+        case 2...: return "Best quality owned: gold. "
+        case 1: return "Best quality owned: silver. "
+        default: return "Normal quality. "
+        }
+    }
+
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: suggestion.inInventory ? "backpack.fill" : (suggestion.onlyOnGround ? "leaf.fill" : "shippingbox"))
@@ -193,11 +202,13 @@ struct GiftChip: View {
                 Image(systemName: "star.fill").font(.system(size: 8)).foregroundStyle(Color.purple)
             } else if suggestion.bestQuality >= 2 {
                 Image(systemName: "star.fill").font(.system(size: 8)).foregroundStyle(Theme.accent)
+            } else if suggestion.bestQuality >= 1 {
+                Image(systemName: "star.fill").font(.system(size: 8)).foregroundStyle(Color.gray)
             }
         }
         .font(.callout).lineLimit(1)
         .padding(.horizontal, 8).padding(.vertical, 3)
         .background(color.opacity(0.1), in: Capsule())
-        .help((suggestion.inInventory ? "In your inventory. " : (suggestion.onlyOnGround ? "Forage on the ground today. " : "")) + "Found in: " + suggestion.places)
+        .help(qualityText + (suggestion.inInventory ? "In your inventory. " : (suggestion.onlyOnGround ? "Forage on the ground today. " : "")) + "Found in: " + suggestion.places)
     }
 }
