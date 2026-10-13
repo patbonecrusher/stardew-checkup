@@ -64,7 +64,7 @@ final class Checkup {
         sections.append(timed("parseGiftPlanner") { parseGiftPlanner() })
         sections.append(timed("parseEventPlanner") { parseEventPlanner() })
         sections.append(timed("parseCooking") { parseCooking() })
-        sections.append(timed("parseCookingPlanner") { parseCookingPlanner() })
+        _ = timed("parseCookingPlanner") { info.overview.cookPlan = buildCookingPlan(); return nil }
         sections.append(timed("parseCrafting") { parseCrafting() })
         sections.append(timed("parseFishing") { parseFishing() })
         sections.append(timed("parseBasicShipping") { parseBasicShipping() })

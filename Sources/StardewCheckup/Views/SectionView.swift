@@ -6,6 +6,10 @@ struct SectionView: View {
     /// When true the section is shown on its own page (larger title, no anchor needed).
     var standalone = false
     @EnvironmentObject var model: AppModel
+    /// Cooking page tab: 0 = checkup, 1 = planner.
+    @AppStorage("cooking-tab") private var cookingTab = 0
+
+    private var cookPlan: CookPlanData? { section.id == "Cooking" ? model.report?.overview.cookPlan : nil }
 
     private var showSummary: Bool { model.isSummaryShown(section, standalone: standalone) }
     private var showDetails: Bool { model.isDetailsShown(section, standalone: standalone) }
@@ -13,7 +17,18 @@ struct SectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             header
-            if showSummary || showDetails {
+            if let plan = cookPlan {
+                Picker("", selection: $cookingTab) {
+                    Label("Checkup", systemImage: "fork.knife").tag(0)
+                    Label("Planner", systemImage: "frying.pan").tag(1)
+                }
+                .pickerStyle(.segmented).labelsHidden().fixedSize()
+                .padding(.leading, 4)
+                if cookingTab == 1 {
+                    CookingPlannerView(data: plan)
+                }
+            }
+            if (showSummary || showDetails) && !(cookPlan != nil && cookingTab == 1) {
                 ForEach(Array(section.globalCells.enumerated()), id: \.offset) { _, cell in
                     CellView(cell: cell, showSummary: showSummary, showDetails: showDetails)
                 }

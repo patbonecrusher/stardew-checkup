@@ -71,7 +71,7 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   events you can trigger right now, the ones that need more hearts (with the
   points still needed and how many of your best gift that is), and the ones
   waiting on a bouquet or a wedding.
-- The Cooking Planner sorts every recipe you haven't cooked into: cook now
+- The Cooking page has a Planner tab that sorts every recipe you haven't cooked into: cook now
   (ingredients in your inventory or fridge), fetch from storage first, missing
   ingredients (with have / need counts), and recipes still to learn with where
   they come from, including whether a Queen of Sauce episode already aired.

@@ -5,8 +5,7 @@ extension Checkup {
     // MARK: Cooking Planner
 
     /// For every recipe: known or not, cooked or not, and whether the host has the ingredients.
-    func parseCookingPlanner() -> Section {
-        var section = Section(title: "Cooking Planner", version: "1.3")
+    func buildCookingPlan() -> CookPlanData {
         let recipes = cookingRecipeMap()
         let validNames = Set(recipes.pairs.map(\.1))
         var known: Set<String> = []
@@ -85,18 +84,6 @@ extension Checkup {
             data.rows.append(row)
         }
 
-        let counts = Dictionary(grouping: data.rows, by: \.state).mapValues(\.count)
-        let total = data.rows.count
-        var cell = Cell()
-        cell.summary.append(.result(RichText("\(info.playerName(info.farmerId)) has cooked \(counts[.cooked] ?? 0) of \(total) recipes; \(total - (counts[.cooked] ?? 0)) left for Gourmet Chef and the Perfection cooking star.")))
-        cell.summary.append(.result(RichText("Of the uncooked ones: \(counts[.cookNow] ?? 0) can be cooked right now, \(counts[.fetch] ?? 0) need ingredients fetched from chests, \(counts[.missing] ?? 0) are missing ingredients, and \(counts[.learn] ?? 0) recipes still have to be learned.")))
-        if !data.hasKitchen {
-            cell.summary.append(.warn(RichText("You need the first farmhouse upgrade (Robin, 10,000g and 450 Wood) to get a kitchen.")))
-        }
-        cell.summary.append(.explain(RichText("The kitchen uses ingredients from your inventory, the fridge and mini-fridges; anything in a chest has to be fetched first. Egg, Milk and Any Fish accept any item of that kind. Ingredients shared between recipes are counted once per recipe.")))
-        cell.details.append(.cookPlan(data))
-        section.hasDetails = true
-        section.globalCells = [cell]
-        return section
+        return data
     }
 }

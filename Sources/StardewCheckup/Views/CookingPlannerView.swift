@@ -25,6 +25,7 @@ struct CookingPlannerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            summary
             HStack(spacing: 14) {
                 TextField("Search recipes or ingredients", text: $filter).textFieldStyle(.roundedBorder).frame(width: 240)
                 Toggle("Show recipes already cooked", isOn: $showCooked).toggleStyle(.checkbox)
@@ -54,6 +55,23 @@ struct CookingPlannerView: View {
         }
         .padding(.leading, 22)
         .padding(.bottom, 4)
+    }
+
+    private var summary: some View {
+        let count = { (s: CookPlanRow.State) in data.rows.filter { $0.state == s }.count }
+        let cooked = count(.cooked), total = data.rows.count
+        return VStack(alignment: .leading, spacing: 4) {
+            Text("\(cooked) of \(total) recipes cooked; \(total - cooked) left for Gourmet Chef and the Perfection cooking star.")
+            Text("Of those: \(count(.cookNow)) can be cooked right now, \(count(.fetch)) need ingredients fetched from chests, \(count(.missing)) are missing ingredients, and \(count(.learn)) still have to be learned.")
+            if !data.hasKitchen {
+                Label("You need the first farmhouse upgrade (Robin, 10,000g and 450 Wood) to get a kitchen.", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(Theme.no)
+            }
+            Text("The kitchen uses ingredients from your inventory, the fridge and mini-fridges; anything in a chest has to be fetched first. Egg, Milk and Any Fish accept any item of that kind. Ingredients shared between recipes are counted once per recipe.")
+                .font(.caption).italic().foregroundStyle(Theme.secondaryText)
+        }
+        .foregroundStyle(Theme.text)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private func color(_ s: CookPlanRow.State) -> Color {

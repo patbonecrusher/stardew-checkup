@@ -335,6 +335,8 @@ struct Overview {
     /// Display names of books read / powers held by the host.
     var booksRead: Set<String> = []
     var powersHave: Set<String> = []
+    /// Host's cooking planner, shown as a tab of the Cooking section.
+    var cookPlan: CookPlanData? = nil
 }
 
 enum Block: Identifiable {
