@@ -24,12 +24,15 @@ extension Checkup {
 
     // MARK: Cooking
 
-    func parseCooking() -> Section {
+    /// Save keys for cooking recipes that differ from the display name.
+    static let cookingTranslate: [String: String] = [
+        "Cheese Cauli.": "Cheese Cauliflower", "Cookies": "Cookie", "Cran. Sauce": "Cranberry Sauce",
+        "Dish o' The Sea": "Dish O' The Sea", "Eggplant Parm.": "Eggplant Parmesan", "Vegetable Stew": "Vegetable Medley",
+    ]
+
+    /// Object id → recipe name for every base-game cooking recipe in this save's version.
+    func cookingRecipeMap() -> OrderedMap {
         var recipes = OrderedMap(CollectionData.cookingRecipes)
-        let translate: [String: String] = [
-            "Cheese Cauli.": "Cheese Cauliflower", "Cookies": "Cookie", "Cran. Sauce": "Cranberry Sauce",
-            "Dish o' The Sea": "Dish O' The Sea", "Eggplant Parm.": "Eggplant Parmesan", "Vegetable Stew": "Vegetable Medley",
-        ]
         if info.isAtLeast("1.4") {
             recipes["733"] = "Shrimp Cocktail"; recipes["253"] = "Triple Shot Espresso"; recipes["265"] = "Seafoam Pudding"
         }
@@ -40,6 +43,12 @@ extension Checkup {
         if info.isAtLeast("1.6") {
             recipes["MossSoup"] = "Moss Soup"
         }
+        return recipes
+    }
+
+    func parseCooking() -> Section {
+        let recipes = cookingRecipeMap()
+        let translate = Checkup.cookingTranslate
         var reverse: [String: String] = [:]
         for (id, name) in recipes.pairs { reverse[name] = id }
 

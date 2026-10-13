@@ -181,8 +181,7 @@ extension Checkup {
             let tasteName = GiftTastes.preserveNames[preserve] ?? name
             let isArtifact = item.childText("type") == "Arch"
             // Skip debris, machines, seeds, fertilizer, building materials, trash, crafting, bait and tackle.
-            let skipCategories: Set<Int> = [-999, -9, -74, -19, -16, -20, -8, -21, -22]
-            if skipCategories.contains(category) || name == "Artifact Spot" { return }
+            if category == -999 || category == -9 || name == "Artifact Spot" { return }
             var entry = owned[name] ?? OwnedItem(name: name, tasteName: tasteName, category: category, isArtifact: isArtifact)
             entry.count += stack
             entry.bestQuality = max(entry.bestQuality, num(item.childText("quality")))
@@ -226,7 +225,9 @@ extension Checkup {
     func giftSuggestions(for info: CharacterInfo, owned: [String: OwnedItem]) -> GiftSuggestions {
         var loves: [GiftSuggestion] = []
         var likes: [GiftSuggestion] = []
-        for item in owned.values {
+        // Never suggest seeds, fertilizer, building materials, trash, crafting items, bait or tackle.
+        let skipCategories: Set<Int> = [-74, -19, -16, -20, -8, -21, -22]
+        for item in owned.values where !skipCategories.contains(item.category) {
             switch GiftTastes.taste(of: item, for: info) {
             case .love: loves.append(GiftSuggestion(item: item, taste: .love))
             case .like: likes.append(GiftSuggestion(item: item, taste: .like))

@@ -28,7 +28,7 @@ enum SectionGroup: String, CaseIterable, Identifiable {
             return .progress
         case "Home_and_Family", "Social", "Calendar", "Characters", "Gift_Planner", "Event_Planner", "Animal_Summary", "Forest_Neighbors":
             return .social
-        case "Cooking", "Crafting", "Fishing", "Basic_Shipping", "Crop_Shipping", "Museum_Collection",
+        case "Cooking", "Cooking_Planner", "Crafting", "Fishing", "Basic_Shipping", "Crop_Shipping", "Museum_Collection",
              "Books__Special_Items___Powers", "Secret_Notes":
             return .collections
         case "Golden_Walnuts", "Island_Upgrades", "Journal_Scraps":
@@ -59,6 +59,7 @@ enum SectionGroup: String, CaseIterable, Identifiable {
         case "Animal_Summary": return "pawprint"
         case "Forest_Neighbors": return "leaf"
         case "Cooking": return "fork.knife"
+        case "Cooking_Planner": return "frying.pan"
         case "Crafting": return "hammer"
         case "Fishing": return "fish"
         case "Basic_Shipping": return "shippingbox"

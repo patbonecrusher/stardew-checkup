@@ -192,3 +192,50 @@ struct EventPlanData {
     var rows: [EventPlanRow] = []
     var spouse: String? = nil
 }
+
+/// One ingredient line in the cooking planner.
+struct CookIngredient: Identifiable {
+    let name: String
+    let need: Int
+    /// Total owned anywhere (inventory, chests, fridges, forage on the ground).
+    var have = 0
+    /// Owned within reach of the kitchen: inventory, the fridge and mini-fridges.
+    var inReach = 0
+    /// Where the owned copies are.
+    var places = ""
+    /// The ingredient is itself a dish you can cook.
+    var isDish = false
+    var id: String { name }
+    var isMissing: Bool { have < need }
+}
+
+struct CookPlanRow: Identifiable {
+    enum State: Int, Comparable {
+        case cookNow, fetch, missing, learn, cooked
+        static func < (a: State, b: State) -> Bool { a.rawValue < b.rawValue }
+        var label: String {
+            switch self {
+            case .cookNow: return "cook now"
+            case .fetch: return "fetch from storage"
+            case .missing: return "missing ingredients"
+            case .learn: return "learn recipe"
+            case .cooked: return "cooked"
+            }
+        }
+    }
+    let name: String
+    var state: State
+    var known: Bool
+    var timesCooked = 0
+    var ingredients: [CookIngredient] = []
+    var source: String
+    /// For Queen of Sauce recipes: whether the episode already aired (so it can come back on a Wednesday rerun).
+    var tvNote: String? = nil
+    var id: String { name }
+    var missingCount: Int { ingredients.filter(\.isMissing).count }
+}
+
+struct CookPlanData {
+    var rows: [CookPlanRow] = []
+    var hasKitchen = true
+}

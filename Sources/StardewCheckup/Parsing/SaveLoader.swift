@@ -170,6 +170,13 @@ enum PlainTextRenderer {
                 }
             }
             return out
+        case .cookPlan(let c):
+            var out = ""
+            for r in c.rows {
+                let ing = r.ingredients.map { "\($0.name) \($0.have)/\($0.need)" + ($0.inReach < $0.need && $0.have >= $0.need ? " (chest)" : "") }.joined(separator: ", ")
+                out += pad + "  [\(r.state.label)] \(r.name): \(ing)" + (r.known ? "" : " — learn: \(r.source)") + "\n"
+            }
+            return out
         case .eventPlan(let e):
             var out = ""
             for r in e.rows where !r.isComplete {

@@ -350,6 +350,7 @@ enum Block: Identifiable {
     case characters(CharactersData)                         // villager reference pages
     case giftPlan(GiftPlanData)                             // weekly gift planner
     case eventPlan(EventPlanData)                           // heart-event to-do list
+    case cookPlan(CookPlanData)                             // cooking planner
 
     var id: String {
         switch self {
@@ -364,6 +365,7 @@ enum Block: Identifiable {
         case .calendar(let c): return "c\(c.season)\(c.day)\(c.year)"
         case .characters(let c): return "p\(c.season)\(c.day)\(c.year)\(c.statuses.count)"
         case .giftPlan(let g): return "g\(g.weekday)\(g.rows.count)\(g.ownedCount)"
+        case .cookPlan(let c): return "k\(c.rows.map { "\($0.name)\($0.state)" }.joined())"
         case .eventPlan(let e): return "v\(e.rows.map { "\($0.name)\($0.points)\($0.seenCount)" }.joined())"
         }
     }
