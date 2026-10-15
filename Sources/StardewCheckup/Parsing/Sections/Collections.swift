@@ -126,9 +126,9 @@ extension Checkup {
 
     // MARK: Crafting
 
-    func parseCrafting() -> Section {
+    /// Every base-game crafting recipe in this save's version.
+    func craftingRecipeNames() -> [String] {
         var recipes = CollectionData.craftingRecipes
-        let translate = ["Oil Of Garlic": "Oil of Garlic"]
         if info.isAtLeast("1.3") {
             recipes += ["Wood Sign", "Stone Sign", "Garden Pot"]
         }
@@ -141,6 +141,12 @@ extension Checkup {
         if info.isAtLeast("1.6") {
             recipes += ["Anvil", "Bait Maker", "Big Chest", "Big Stone Chest", "Blue Grass Starter", "Challenge Bait", "Dehydrator", "Deluxe Bait", "Deluxe Worm Bin", "Fish Smoker", "Heavy Furnace", "Mini-Forge", "Mushroom Log", "Mystic Tree Seed", "Sonar Bobber", "Statue Of Blessings", "Statue Of The Dwarf King", "Tent Kit", "Text Sign", "Treasure Totem"]
         }
+        return recipes
+    }
+
+    func parseCrafting() -> Section {
+        let recipes = craftingRecipeNames()
+        let translate = ["Oil Of Garlic": "Oil of Garlic"]
         let recipeSet = Set(recipes)
 
         return playerSection(title: "Crafting", version: "1.2") { player, meta in
@@ -265,7 +271,10 @@ extension Checkup {
                     }
                 }
             }
-            if umid == info.farmerId { info.overview.fishCaught = Set(known.keys) }
+            if umid == info.farmerId {
+                info.overview.fishCaught = Set(known.keys)
+                info.overview.fishPlan = buildFishPlan(caught: Set(known.keys))
+            }
             var ptPct = RichText()
             if info.isAtLeast("1.5") {
                 info.perfection.set(umid, "Fishing", CountTotal(count: craftCount, total: recipeCount))
@@ -354,6 +363,7 @@ extension Checkup {
                 ptPct = Fmt.ptLink(pct: Double(craftCount) / Double(recipeCount))
             }
             var cell = Cell()
+            if umid == info.farmerId { info.overview.shipPlan = buildShipPlan(items: recipes.pairs, shipped: crafted) }
             cell.summary.append(.result("\(playerName(player)) has shipped \(craftCount) of \(recipeCount) basic items.".rt + ptPct))
             cell.summary.append(.achList([
                 (craftCount >= recipeCount ? Fmt.achieve("Full Shipment", "ship every item", true)
@@ -391,6 +401,7 @@ extension Checkup {
                     if n > maxShip { maxShip = n; maxCrop = r }
                 }
             }
+            if info.umid(of: player) == info.farmerId { info.overview.cropPlan = buildCropPlan(shipped: crafted) }
             var cell = Cell()
             cell.summary.append(.result(RichText(maxShip > 0 ? "\(farmer) has shipped \(maxCrop) the most (\(maxShip))." : "\(farmer) has not shipped any crops yet.")))
             cell.summary.append(.achList([

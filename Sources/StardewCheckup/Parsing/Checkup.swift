@@ -27,6 +27,8 @@ final class Checkup {
     var hostCharacterStatus: [String: CharacterStatus] = [:]
     /// Giftable items the host owns (inventory, chests, fridges), filled lazily.
     lazy var hostOwnedItems: [String: OwnedItem] = collectOwnedItems()
+    /// The same items keyed by item id, for planners that know the exact item.
+    lazy var hostOwnedByID: [String: OwnedItem] = collectOwnedItems(byID: true)
     /// Loved / liked owned items per villager, computed once.
     lazy var hostGiftSuggestions: [String: GiftSuggestions] = {
         var out: [String: GiftSuggestions] = [:]
@@ -66,6 +68,7 @@ final class Checkup {
         sections.append(timed("parseCooking") { parseCooking() })
         _ = timed("parseCookingPlanner") { info.overview.cookPlan = buildCookingPlan(); return nil }
         sections.append(timed("parseCrafting") { parseCrafting() })
+        _ = timed("parseCraftingPlanner") { info.overview.craftPlan = buildCraftingPlan(); return nil }
         sections.append(timed("parseFishing") { parseFishing() })
         sections.append(timed("parseBasicShipping") { parseBasicShipping() })
         sections.append(timed("parseCropShipping") { parseCropShipping() })
@@ -74,6 +77,7 @@ final class Checkup {
         sections.append(timed("parseSecretNotes") { parseSecretNotes() })
         sections.append(timed("parseJournalScraps") { parseJournalScraps() })
         sections.append(timed("parseBundles") { parseBundles() })
+        _ = timed("parseBundlePlanner") { info.overview.bundlePlan = buildBundlePlan(); return nil }
         sections.append(timed("parseRaccoons") { parseRaccoons() })
         sections.append(timed("parseGrandpa") { parseGrandpa() })
         sections.append(timed("parseWalnuts") { parseWalnuts() })

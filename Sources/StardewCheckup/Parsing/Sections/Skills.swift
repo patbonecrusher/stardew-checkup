@@ -250,6 +250,16 @@ extension Checkup {
                     killed[cat, default: 0] += n
                 }
             }
+            if umid == info.farmerId {
+                var plan = MonsterPlanData(mineLevel: min(mineLevel, 120), skullLevel: max(0, mineLevel - 120))
+                for (goal, target) in goals {
+                    let g = Checkup.monsterGoalInfo[goal]
+                    plan.rows.append(MonsterPlanRow(goal: goal, target: target, killed: killed[goal] ?? 0, monsters: monsters[goal] ?? [],
+                                                    whereToFind: g?.where ?? "", reward: g?.reward ?? "",
+                                                    claimed: g.map { info.data[umid]?.hasMail($0.mail) ?? false } ?? false))
+                }
+                info.overview.monsterPlan = plan
+            }
             var completed = 0
             var need: [DetailItem] = []
             for (goal, target) in goals {

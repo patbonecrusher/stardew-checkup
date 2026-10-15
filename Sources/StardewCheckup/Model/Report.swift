@@ -337,6 +337,14 @@ struct Overview {
     var powersHave: Set<String> = []
     /// Host's cooking planner, shown as a tab of the Cooking section.
     var cookPlan: CookPlanData? = nil
+    /// Host's planners for the other collection pages, shown as Planner tabs.
+    var craftPlan: CookPlanData? = nil
+    var bundlePlan: BundlePlanData? = nil
+    var fishPlan: FishPlanData? = nil
+    var museumPlan: MuseumPlanData? = nil
+    var shipPlan: ShipPlanData? = nil
+    var cropPlan: CropPlanData? = nil
+    var monsterPlan: MonsterPlanData? = nil
 }
 
 enum Block: Identifiable {

@@ -71,10 +71,25 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   events you can trigger right now, the ones that need more hearts (with the
   points still needed and how many of your best gift that is), and the ones
   waiting on a bouquet or a wedding.
-- The Cooking page has a Planner tab that sorts every recipe you haven't cooked into: cook now
-  (ingredients in your inventory or fridge), fetch from storage first, missing
-  ingredients (with have / need counts), and recipes still to learn with where
-  they come from, including whether a Queen of Sauce episode already aired.
+- Planner tabs: several pages have a Checkup / Planner switch at the top.
+  - Cooking and Crafting: every recipe you haven't made yet, sorted into make
+    now (ingredients in your inventory or fridge), fetch from storage first,
+    missing ingredients (with have / need counts), and recipes still to learn
+    with where they come from (including whether a Queen of Sauce episode
+    already aired).
+  - Community Center: per bundle, which items you already own (with the right
+    quality), which bundles you can finish right now or after a trip to your
+    chests, and where to get the rest.
+  - Fishing: uncaught fish you can catch today given the season and today's
+    rain, the ones waiting for the other weather or a later season, and the
+    ones still locked (mine floor, Rusty Key, Ginger Island, fishing level).
+  - Museum: artifacts and minerals you own and can donate now, ones you found
+    once but no longer have, and where to look for the rest.
+  - Shipping and Crop Shipping: items you own but never shipped, and for
+    Polyculture which crops to ship now, which you can still plant this season
+    in time for a harvest, and where to buy the seeds.
+  - Monster Hunting: each eradication goal with kills left, where those
+    monsters live, the reward, and whether it is waiting to be claimed.
 - The Books, Special Items & Powers section lists where every book and power
   comes from (wiki text), with have / missing status and an "only missing"
   filter.

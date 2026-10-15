@@ -1,18 +1,28 @@
 import SwiftUI
 
-/// Cooking planner: what can be cooked now, what needs fetching or buying, and what is left to learn.
+/// Cooking (or crafting) planner: what can be made now, what needs fetching or buying, and what is left to learn.
 struct CookingPlannerView: View {
+    enum Kind { case cooking, crafting }
     let data: CookPlanData
+    var kind: Kind = .cooking
     @State private var showCooked = false
     @State private var filter = ""
 
-    private static let groups: [(CookPlanRow.State, String, String, String)] = [
-        (.cookNow, "Cook now", "flame.fill", "Known, not cooked yet, and everything is in your inventory or fridge."),
-        (.fetch, "Fetch from storage first", "shippingbox.fill", "You own everything, but some of it is in a chest or on the ground."),
-        (.missing, "Missing ingredients", "cart.fill", "Known recipes you still need ingredients for."),
-        (.learn, "Recipes to learn", "book.closed.fill", "Not known yet: where the recipe comes from."),
-        (.cooked, "Already cooked", "checkmark.seal.fill", "Cooked at least once; shown so you can see what you could cook again."),
-    ]
+    private var groups: [(CookPlanRow.State, String, String, String)] {
+        kind == .cooking ? [
+            (.cookNow, "Cook now", "flame.fill", "Known, not cooked yet, and everything is in your inventory or fridge."),
+            (.fetch, "Fetch from storage first", "shippingbox.fill", "You own everything, but some of it is in a chest or on the ground."),
+            (.missing, "Missing ingredients", "cart.fill", "Known recipes you still need ingredients for."),
+            (.learn, "Recipes to learn", "book.closed.fill", "Not known yet: where the recipe comes from."),
+            (.cooked, "Already cooked", "checkmark.seal.fill", "Cooked at least once; shown so you can see what you could cook again."),
+        ] : [
+            (.cookNow, "Craft now", "hammer.fill", "Known, never crafted, and everything is in your backpack."),
+            (.fetch, "Fetch from storage first", "shippingbox.fill", "You own everything, but some of it is in a chest, fridge or on the ground."),
+            (.missing, "Missing ingredients", "cart.fill", "Known recipes you still need materials for."),
+            (.learn, "Recipes to learn", "book.closed.fill", "Not known yet: where the recipe comes from."),
+            (.cooked, "Already crafted", "checkmark.seal.fill", "Crafted at least once."),
+        ]
+    }
 
     private func rows(_ state: CookPlanRow.State) -> [CookPlanRow] {
         data.rows.filter { $0.state == state && (filter.isEmpty || matches($0)) }
@@ -28,11 +38,11 @@ struct CookingPlannerView: View {
             summary
             HStack(spacing: 14) {
                 TextField("Search recipes or ingredients", text: $filter).textFieldStyle(.roundedBorder).frame(width: 240)
-                Toggle("Show recipes already cooked", isOn: $showCooked).toggleStyle(.checkbox)
+                Toggle(kind == .cooking ? "Show recipes already cooked" : "Show recipes already crafted", isOn: $showCooked).toggleStyle(.checkbox)
                 Spacer()
             }
             .font(.callout)
-            ForEach(Self.groups, id: \.0) { state, title, symbol, blurb in
+            ForEach(groups, id: \.0) { state, title, symbol, blurb in
                 let list = rows(state)
                 if !list.isEmpty && (state != .cooked || showCooked) {
                     VStack(alignment: .leading, spacing: 6) {
@@ -46,7 +56,7 @@ struct CookingPlannerView: View {
                         .foregroundStyle(Theme.text)
                         Text(blurb).font(.caption).foregroundStyle(Theme.secondaryText)
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 340, maximum: 520), spacing: 8, alignment: .top)], alignment: .leading, spacing: 8) {
-                            ForEach(list) { RecipeCard(row: $0, color: color(state)) }
+                            ForEach(list) { RecipeCard(row: $0, color: color(state), kind: kind) }
                         }
                     }
                     .padding(.bottom, 4)
@@ -60,14 +70,17 @@ struct CookingPlannerView: View {
     private var summary: some View {
         let count = { (s: CookPlanRow.State) in data.rows.filter { $0.state == s }.count }
         let cooked = count(.cooked), total = data.rows.count
+        let verb = kind == .cooking ? "cooked" : "crafted"
         return VStack(alignment: .leading, spacing: 4) {
-            Text("\(cooked) of \(total) recipes cooked; \(total - cooked) left for Gourmet Chef and the Perfection cooking star.")
-            Text("Of those: \(count(.cookNow)) can be cooked right now, \(count(.fetch)) need ingredients fetched from chests, \(count(.missing)) are missing ingredients, and \(count(.learn)) still have to be learned.")
+            Text("\(cooked) of \(total) recipes \(verb); \(total - cooked) left for \(kind == .cooking ? "Gourmet Chef" : "Craft Master") and the Perfection \(kind == .cooking ? "cooking" : "crafting") star.")
+            Text("Of those: \(count(.cookNow)) can be \(verb) right now, \(count(.fetch)) need ingredients fetched from storage, \(count(.missing)) are missing ingredients, and \(count(.learn)) still have to be learned.")
             if !data.hasKitchen {
                 Label("You need the first farmhouse upgrade (Robin, 10,000g and 450 Wood) to get a kitchen.", systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(Theme.no)
             }
-            Text("The kitchen uses ingredients from your inventory, the fridge and mini-fridges; anything in a chest has to be fetched first. Egg, Milk and Any Fish accept any item of that kind. Ingredients shared between recipes are counted once per recipe.")
+            Text(kind == .cooking
+                 ? "The kitchen uses ingredients from your inventory, the fridge and mini-fridges; anything in a chest has to be fetched first. Egg, Milk and Any Fish accept any item of that kind. Ingredients shared between recipes are counted once per recipe."
+                 : "Crafting uses what is in your backpack (in 1.6 a workbench also reaches chests next to it). Ingredients shared between recipes are counted once per recipe; crafted ingredients such as a Furnace are not tracked as owned.")
                 .font(.caption).italic().foregroundStyle(Theme.secondaryText)
         }
         .foregroundStyle(Theme.text)
@@ -88,6 +101,7 @@ struct CookingPlannerView: View {
 private struct RecipeCard: View {
     let row: CookPlanRow
     let color: Color
+    let kind: CookingPlannerView.Kind
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -98,7 +112,7 @@ private struct RecipeCard: View {
                     Text(row.name)
                 }
                 if row.timesCooked > 0 {
-                    Text("cooked ×\(row.timesCooked)").font(.caption).foregroundStyle(Theme.secondaryText)
+                    Text("\(kind == .cooking ? "cooked" : "crafted") ×\(row.timesCooked)").font(.caption).foregroundStyle(Theme.secondaryText)
                 }
                 Spacer()
                 if row.state == .missing {
@@ -107,7 +121,7 @@ private struct RecipeCard: View {
             }
             .font(.body.weight(.semibold))
             ForEach(row.ingredients) { ing in
-                IngredientLine(ing: ing)
+                IngredientLine(ing: ing, kind: kind)
             }
             if !row.known {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
@@ -132,6 +146,7 @@ private struct RecipeCard: View {
 
 private struct IngredientLine: View {
     let ing: CookIngredient
+    let kind: CookingPlannerView.Kind
 
     private var symbol: String {
         if ing.isMissing { return "xmark.circle.fill" }
@@ -153,7 +168,7 @@ private struct IngredientLine: View {
             }
             Text("×\(ing.need)").foregroundStyle(Theme.secondaryText)
             if ing.isDish && ing.isMissing {
-                Text("cook it first").font(.caption2).foregroundStyle(Theme.accent)
+                Text(kind == .cooking ? "cook it first" : "craft it first").font(.caption2).foregroundStyle(Theme.accent)
             }
             Spacer()
             Text("have \(ing.have)").font(.caption).monospacedDigit().foregroundStyle(ing.isMissing ? Theme.no : Theme.secondaryText)

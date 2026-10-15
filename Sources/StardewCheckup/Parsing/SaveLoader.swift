@@ -235,3 +235,62 @@ enum PlainTextRenderer {
         return out
     }
 }
+
+extension PlainTextRenderer {
+    /// Text version of the Planner tabs, for `--dump <save> --planners`.
+    static func renderPlanners(_ o: Overview) -> String {
+        var out = ""
+        func item(_ i: PlanItem) -> String {
+            var t = i.name + (i.need > 1 && !i.isMoney ? " ×\(i.need)" : "") + (i.qualityLabel.map { " (\($0)+)" } ?? "")
+            t += i.done ? " [done]" : i.isReady ? " [in backpack]" : i.isMissing ? " [missing\(i.hint.map { ": " + $0 } ?? "")]" : " [have \(i.have), in storage]"
+            return t
+        }
+        if let b = o.bundlePlan {
+            out += "== Bundles: \(b.roomsDone)/\(b.roomsTotal) rooms\(b.isJoja ? " (Joja)" : "")\n"
+            for r in b.rows where r.state != .done {
+                out += "  [\(r.state)] \(r.room) / \(r.name): \(r.left) left; reward \(r.reward)\n"
+                for i in r.items where !i.done { out += "     - " + item(i) + "\n" }
+            }
+        }
+        if let f = o.fishPlan {
+            out += "== Fishing: \(f.season) \(f.day), \(f.isRaining ? "rain" : "dry"), level \(f.fishingLevel), \(f.caught)/\(f.total)\n"
+            for g in FishPlanRow.Group.allCases {
+                let rows = f.rows.filter { $0.group == g }
+                if rows.isEmpty { continue }
+                out += "  [\(g)] " + rows.map { $0.fish.name + ($0.nextSeason.isEmpty ? "" : " (\($0.nextSeason))") + ($0.blockers.isEmpty ? "" : " {\($0.blockers.joined(separator: "; "))}") }.joined(separator: ", ") + "\n"
+            }
+        }
+        if let c = o.craftPlan {
+            out += "== Crafting\n"
+            for r in c.rows where r.state != .cooked {
+                out += "  [\(r.state.label)] \(r.name): " + r.ingredients.map { "\($0.name) \($0.have)/\($0.need)" }.joined(separator: ", ") + (r.known ? "" : " — learn: \(r.source)") + "\n"
+            }
+        }
+        if let m = o.museumPlan {
+            out += "== Museum: \(m.donated)/\(m.total)\n"
+            for s in MuseumPlanRow.State.allCases {
+                let rows = m.rows.filter { $0.state == s }
+                if rows.isEmpty { continue }
+                out += "  [\(s)] " + rows.map { $0.name + (s == .donateNow ? " (\($0.places))" : "") }.joined(separator: ", ") + "\n"
+            }
+        }
+        if let s = o.shipPlan {
+            out += "== Shipping: \(s.shipped)/\(s.total)\n"
+            for st in ShipPlanRow.State.allCases {
+                let rows = s.rows.filter { $0.state == st }
+                if !rows.isEmpty { out += "  [\(st)] " + rows.map { $0.item.name }.joined(separator: ", ") + "\n" }
+            }
+        }
+        if let c = o.cropPlan {
+            out += "== Crops: \(c.season) \(c.day)\n"
+            for r in c.rows where r.state != .done {
+                out += "  [\(r.state)] \(r.name): \(r.shipped)/15, own \(r.owned), seeds \(r.seedsOwned)" + (r.harvestDay.map { ", harvest day \($0)" } ?? "") + "\n"
+            }
+        }
+        if let m = o.monsterPlan {
+            out += "== Monsters: mine \(m.mineLevel), skull \(m.skullLevel)\n"
+            for r in m.rows { out += "  \(r.goal): \(r.killed)/\(r.target)\(r.isDone ? (r.claimed ? " claimed" : " CLAIM") : "") — \(r.reward)\n" }
+        }
+        return out
+    }
+}

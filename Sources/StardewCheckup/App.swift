@@ -5,14 +5,15 @@ struct StardewCheckupApp: App {
     @StateObject private var model = AppModel()
 
     init() {
-        // Headless mode: `StardewCheckup --dump <save file>` prints the report as text.
+        // Headless mode: `StardewCheckup --dump <save file>` prints the report as text
+        // (add `--planners` to print the Planner tabs instead).
         let args = CommandLine.arguments
         Checkup.timingEnabled = args.contains("--timing")
         if let i = args.firstIndex(of: "--dump"), i + 1 < args.count {
             let url = URL(fileURLWithPath: args[i + 1])
             do {
                 let report = try SaveLoader.load(url: url)
-                print(PlainTextRenderer.render(report))
+                print(args.contains("--planners") ? PlainTextRenderer.renderPlanners(report.overview) : PlainTextRenderer.render(report))
                 exit(0)
             } catch {
                 FileHandle.standardError.write(Data("Error: \(error.localizedDescription)\n".utf8))

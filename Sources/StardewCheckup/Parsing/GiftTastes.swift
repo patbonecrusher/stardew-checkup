@@ -16,6 +16,12 @@ struct OwnedItem {
     var bestQuality = 0
     /// Where it is kept → count there.
     var places: [String: Int] = [:]
+    /// Quality → count, overall and in the backpack only (bundles ask for a minimum quality).
+    var byQuality: [Int: Int] = [:]
+    var inventoryByQuality: [Int: Int] = [:]
+
+    func count(atLeast quality: Int) -> Int { byQuality.filter { $0.key >= quality }.values.reduce(0, +) }
+    func inventoryCount(atLeast quality: Int) -> Int { inventoryByQuality.filter { $0.key >= quality }.values.reduce(0, +) }
 
     /// True when every copy is forage lying on the ground rather than something you hold.
     var onlyOnGround: Bool { !places.isEmpty && places.keys.allSatisfy { $0.hasPrefix("Ground") } }
@@ -167,7 +173,9 @@ enum GiftTastes {
 extension Checkup {
     /// Everything giftable the host owns: inventory, every placed chest (including auto-grabber and
     /// fridge contents) keyed by location.
-    func collectOwnedItems() -> [String: OwnedItem] {
+    /// Owned items keyed by name, or by item id when `byID` (ids tell apart items sharing a
+    /// name, such as white and brown eggs, and group every flavor of Jelly, Wine...).
+    func collectOwnedItems(byID: Bool = false) -> [String: OwnedItem] {
         var owned: [String: OwnedItem] = [:]
         let giftable: Set<String> = ["Object", "ColoredObject"]
         func add(_ item: XNode, place: String) {
@@ -182,11 +190,15 @@ extension Checkup {
             let isArtifact = item.childText("type") == "Arch"
             // Skip debris, machines, seeds, fertilizer, building materials, trash, crafting, bait and tackle.
             if category == -999 || category == -9 || name == "Artifact Spot" { return }
-            var entry = owned[name] ?? OwnedItem(name: name, tasteName: tasteName, category: category, isArtifact: isArtifact)
+            let key = byID ? (item.childText("itemId").isEmpty ? item.childText("parentSheetIndex") : item.childText("itemId")) : name
+            var entry = owned[key] ?? OwnedItem(name: name, tasteName: tasteName, category: category, isArtifact: isArtifact)
             entry.count += stack
-            entry.bestQuality = max(entry.bestQuality, num(item.childText("quality")))
+            let quality = num(item.childText("quality"))
+            entry.bestQuality = max(entry.bestQuality, quality)
             entry.places[place, default: 0] += stack
-            owned[name] = entry
+            entry.byQuality[quality, default: 0] += stack
+            if place == "Inventory" { entry.inventoryByQuality[quality, default: 0] += stack }
+            owned[key] = entry
         }
         for item in hostPlayer.find("items > Item") { add(item, place: "Inventory") }
 

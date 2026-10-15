@@ -6,10 +6,34 @@ struct SectionView: View {
     /// When true the section is shown on its own page (larger title, no anchor needed).
     var standalone = false
     @EnvironmentObject var model: AppModel
-    /// Cooking page tab: 0 = checkup, 1 = planner.
-    @AppStorage("cooking-tab") private var cookingTab = 0
+    /// Section ids whose page is showing the Planner tab instead of the checkup.
+    @AppStorage("planner-tabs") private var plannerTabs = ""
 
-    private var cookPlan: CookPlanData? { section.id == "Cooking" ? model.report?.overview.cookPlan : nil }
+    /// The Planner tab for this section, when it has one.
+    private var planner: AnyView? {
+        guard let o = model.report?.overview else { return nil }
+        switch section.id {
+        case "Cooking": return o.cookPlan.map { AnyView(CookingPlannerView(data: $0)) }
+        case "Crafting": return o.craftPlan.map { AnyView(CookingPlannerView(data: $0, kind: .crafting)) }
+        case "Fishing": return o.fishPlan.map { AnyView(FishPlannerView(data: $0)) }
+        case "Basic_Shipping": return o.shipPlan.map { AnyView(ShipPlannerView(data: $0)) }
+        case "Crop_Shipping": return o.cropPlan.map { AnyView(CropPlannerView(data: $0)) }
+        case "Museum_Collection": return o.museumPlan.map { AnyView(MuseumPlannerView(data: $0)) }
+        case "Monster_Hunting": return o.monsterPlan.map { AnyView(MonsterPlannerView(data: $0)) }
+        case "Community_Center___Joja_Community_Development": return o.bundlePlan.map { AnyView(BundlePlannerView(data: $0)) }
+        default: return nil
+        }
+    }
+
+    private var showPlanner: Bool {
+        CommandLine.arguments.contains("--planner") || plannerTabs.split(separator: ",").contains(Substring(section.id))
+    }
+
+    private func setPlanner(_ on: Bool) {
+        var ids = Set(plannerTabs.split(separator: ",").map(String.init))
+        if on { ids.insert(section.id) } else { ids.remove(section.id) }
+        plannerTabs = ids.sorted().joined(separator: ",")
+    }
 
     private var showSummary: Bool { model.isSummaryShown(section, standalone: standalone) }
     private var showDetails: Bool { model.isDetailsShown(section, standalone: standalone) }
@@ -17,18 +41,18 @@ struct SectionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             header
-            if let plan = cookPlan {
-                Picker("", selection: $cookingTab) {
-                    Label("Checkup", systemImage: "fork.knife").tag(0)
-                    Label("Planner", systemImage: "frying.pan").tag(1)
+            let planner = planner
+            if let planner {
+                Picker("", selection: Binding(get: { showPlanner }, set: { setPlanner($0) })) {
+                    Label("Checkup", systemImage: SectionGroup.symbol(for: section.id)).tag(false)
+                    Label("Planner", systemImage: "list.bullet.clipboard").tag(true)
                 }
                 .pickerStyle(.segmented).labelsHidden().fixedSize()
                 .padding(.leading, 4)
-                if cookingTab == 1 {
-                    CookingPlannerView(data: plan)
-                }
+                if showPlanner { planner }
             }
-            if (showSummary || showDetails) && !(cookPlan != nil && cookingTab == 1) {
+            let onPlanner = planner != nil && showPlanner
+            if (showSummary || showDetails) && !onPlanner {
                 ForEach(Array(section.globalCells.enumerated()), id: \.offset) { _, cell in
                     CellView(cell: cell, showSummary: showSummary, showDetails: showDetails)
                 }
@@ -39,13 +63,13 @@ struct SectionView: View {
                     CellView(cell: cell, showSummary: showSummary, showDetails: showDetails)
                 }
             }
-            if section.id == "Skills", let report = model.report {
+            if section.id == "Skills", !onPlanner, let report = model.report {
                 SkillXPGuideView(skillXP: report.overview.skillXP, expanded: standalone)
             }
             if section.id == "Books__Special_Items___Powers", let report = model.report {
                 PowersGuideView(booksRead: report.overview.booksRead, powersHave: report.overview.powersHave, expanded: standalone)
             }
-            if section.id == "Fishing", let report = model.report {
+            if section.id == "Fishing", !onPlanner, let report = model.report {
                 FishGuideView(caught: report.overview.fishCaught, currentSeason: report.overview.currentSeason,
                               fishingLevel: FishGuideView.level(forXP: report.overview.skillXP.count > 1 ? report.overview.skillXP[1] : 0),
                               expanded: standalone)

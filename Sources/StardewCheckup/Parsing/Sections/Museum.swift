@@ -20,6 +20,7 @@ extension Checkup {
             if artifacts.has(id) || minerals.has(id) { donated.insert(id) }
         }
         let donatedCount = donated.count
+        info.overview.museumPlan = buildMuseumPlan(donated: donated)
 
         info.overview.collections.append(("Museum", "Museum_Collection", donatedCount, museumCount))
         var global = Cell()
