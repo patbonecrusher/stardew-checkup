@@ -62,11 +62,17 @@ struct CharacterStatus {
     var birthdayGiftedThisYear = false
     /// Social-section event key → seen state.
     var eventStates: [String: MarkState] = [:]
+    /// Every event id the host has seen, for heart events the Social section doesn't list.
+    var eventsSeen: Set<String> = []
 
     /// Seen / not seen / impossible for a wiki heart event; nil when the save does not track it.
     func state(of event: CharacterInfo.HeartEvent) -> MarkState? {
         guard !event.idKeys.isEmpty else { return nil }
-        let states = event.idKeys.compactMap { eventStates[$0] }
+        let states = event.idKeys.compactMap { key -> MarkState? in
+            if let s = eventStates[key] { return s }
+            guard !eventsSeen.isEmpty else { return nil }
+            return key.split(separator: "|").contains { eventsSeen.contains(String($0)) } ? .yes : .no
+        }
         guard states.count == event.idKeys.count else { return nil }
         if states.allSatisfy({ $0 == .yes }) { return .yes }
         if states.contains(.imp) { return .imp }

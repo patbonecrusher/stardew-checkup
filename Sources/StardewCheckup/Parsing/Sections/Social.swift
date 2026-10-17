@@ -123,6 +123,13 @@ extension Checkup {
         var section = Section(title: "Social", version: "1.2")
         section.columns = perPlayer { parsePlayerSocial($0, meta) }
         section.hasDetails = meta.hasDetails
+        // Leah's 8-heart event needs the art show (LeahArtShowSuggestion) or online shop (LeahInternet)
+        // idea from her 2-heart scene; with neither after that scene, it can never happen.
+        let host = info.host
+        if host.hasEvent("50") && !host.hasMail("LeahArtShowSuggestion") && !host.hasMail("LeahInternet"),
+           hostEventStates["53|584059"] == .no {
+            hostEventStates["53|584059"] = .imp
+        }
         return section
     }
 

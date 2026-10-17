@@ -2,7 +2,7 @@ import json, re, sys
 sys.path.insert(0, '.')
 from text import TRIG, ROLE
 from eventmap import ids_for, hearts_of, OVERRIDE
-OVERRIDE[("Leah","Six Hearts II")] = ["53|584059"]; OVERRIDE[("Leah","Eight Hearts")] = ["53|584059"]
+OVERRIDE[("Leah","Six Hearts I")] = ["992253"]; OVERRIDE[("Leah","Six Hearts II")] = ["52"]; OVERRIDE[("Leah","Eight Hearts")] = ["53|584059"]
 
 SEASONS = ["Spring", "Summer", "Fall", "Winter"]
 def fix(t):

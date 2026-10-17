@@ -14,6 +14,7 @@ extension Checkup {
         for info in CharacterData.all {
             var st = hostCharacterStatus[info.name] ?? CharacterStatus(name: info.name)
             st.eventStates = hostEventStates
+            st.eventsSeen = self.info.host.eventsSeen
             var row = EventPlanRow(name: info.name)
             row.hearts = st.hearts
             row.points = st.points

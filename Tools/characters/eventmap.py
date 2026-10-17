@@ -23,7 +23,7 @@ WORDS = {"Zero":0,"Two":2,"Three":3,"Four":4,"Five":5,"Six":6,"Seven":7,"Eight":
 GIRLS = {"Abigail","Emily","Haley","Leah","Maru","Penny"}
 OVERRIDE = {
  ("Shane","Seven Hearts I"): ["3910974"], ("Shane","Seven Hearts II"): ["831125"],
- ("Leah","Six Hearts I"): ["52"], ("Leah","Six Hearts II"): ["584059"], ("Leah","Eight Hearts"): ["53"],
+ ("Leah","Six Hearts I"): ["992253"], ("Leah","Six Hearts II"): ["52"], ("Leah","Eight Hearts"): ["53|584059"],
  ("Dwarf","50 Friendship Points"): ["691039"], ("Linus","Zero Hearts"): ["502969"],
  ("Clint","Three Hearts II"): [], ("Marnie","Three Hearts I"): [], ("Marnie","Three Hearts II"): [], ("Kent","Three Hearts II"): [],
 }

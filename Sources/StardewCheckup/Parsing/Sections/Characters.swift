@@ -36,6 +36,7 @@ extension Checkup {
         for info in CharacterData.all {
             var st = hostCharacterStatus[info.name] ?? CharacterStatus(name: info.name)
             st.eventStates = hostEventStates
+            st.eventsSeen = self.info.host.eventsSeen
             if let g = lastGift[info.name], g.year == year, g.season == info.birthday.season, g.day == info.birthday.day {
                 st.birthdayGiftedThisYear = true
             }
