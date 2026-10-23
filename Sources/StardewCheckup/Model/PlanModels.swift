@@ -157,3 +157,34 @@ struct MonsterPlanData {
     var mineLevel = 0
     var skullLevel = 0
 }
+
+// MARK: Storage
+
+/// One stack of items in a container.
+struct StoredItem: Identifiable {
+    let id = UUID()
+    let name: String
+    var count: Int
+    var quality: Int
+    /// Item kind for grouping: "Tool", "Weapon", "Ring", "Hat", "Boots", "Clothing", "Furniture" or "Item".
+    var kind: String
+}
+
+/// A chest, fridge, auto-grabber or the backpack, with what is inside.
+struct StorageBox: Identifiable {
+    let id: String
+    var name: String            // "Chest", "Big Chest", "Stone Chest", "Fridge", "Auto-Grabber", "Backpack"...
+    var location: String        // "Farm", "Shed", "Farmhouse"...
+    var tile: (x: Int, y: Int)? = nil
+    /// Player-chosen chest colour as RGB, nil for the default wood colour.
+    var color: (r: Int, g: Int, b: Int)? = nil
+    var capacity: Int = 36
+    var items: [StoredItem] = []
+    var label: String { tile.map { "\(name), \(location) (\($0.x), \($0.y))" } ?? "\(name), \(location)" }
+    var usedSlots: Int { items.count }
+}
+
+struct StorageData {
+    var boxes: [StorageBox] = []
+    var totalStacks: Int { boxes.reduce(0) { $0 + $1.items.count } }
+}

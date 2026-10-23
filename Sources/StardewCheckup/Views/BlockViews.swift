@@ -110,6 +110,8 @@ struct BlockView: View {
             EventPlannerView(data: data)
         case .cookPlan(let data):
             CookingPlannerView(data: data)
+        case .storage(let data):
+            StorageView(data: data)
         }
     }
 

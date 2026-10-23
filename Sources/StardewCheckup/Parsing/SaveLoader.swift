@@ -177,6 +177,13 @@ enum PlainTextRenderer {
                 out += pad + "  [\(r.state.label)] \(r.name): \(ing)" + (r.known ? "" : " — learn: \(r.source)") + "\n"
             }
             return out
+        case .storage(let s):
+            var out = ""
+            for b in s.boxes {
+                out += pad + "  \(b.label) [\(b.items.count)/\(b.capacity)]\(b.color.map { " rgb(\($0.r),\($0.g),\($0.b))" } ?? "")\n"
+                for i in b.items { out += pad + "    \(i.name) ×\(i.count)\(i.quality > 0 ? " q\(i.quality)" : "")\n" }
+            }
+            return out
         case .eventPlan(let e):
             var out = ""
             for r in e.rows where !r.isComplete {

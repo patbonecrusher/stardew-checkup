@@ -85,6 +85,7 @@ final class Checkup {
         sections.append(timed("parsePerfectionTracker") { parsePerfectionTracker() })
         sections.append(timed("parseArcadeGames") { parseArcadeGames() })
         sections.append(timed("parseAnimals") { parseAnimals() })
+        sections.append(timed("parseStorage") { parseStorage() })
         report.sections = sections.compactMap { $0 }
         report.farmName = info.farmName
         report.playerNames = info.playerOrder.map { info.playerName($0) }

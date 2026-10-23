@@ -71,6 +71,10 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   events you can trigger right now, the ones that need more hearts (with the
   points still needed and how many of your best gift that is), and the ones
   waiting on a bouquet or a wedding.
+- The Storage page lists every chest, big chest, stone chest, fridge,
+  mini-fridge and auto-grabber with its location, tile, colour and contents
+  (plus your backpack). Search an item to see which chest holds it, or switch
+  to the by-item view for a list of every item and where each stack is.
 - Planner tabs: several pages have a Checkup / Planner switch at the top.
   - Cooking and Crafting: every recipe you haven't made yet, sorted into make
     now (ingredients in your inventory or fridge), fetch from storage first,
