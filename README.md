@@ -75,6 +75,8 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   mini-fridge and auto-grabber with its location, tile, colour and contents
   (plus your backpack). Search an item to see which chest holds it, or switch
   to the by-item view for a list of every item and where each stack is.
+  Each chest says where it is from your front door ("12 right, 4 down"), and
+  a small farm map marks every chest; click one to highlight it.
 - Planner tabs: several pages have a Checkup / Planner switch at the top.
   - Cooking and Crafting: every recipe you haven't made yet, sorted into make
     now (ingredients in your inventory or fridge), fetch from storage first,

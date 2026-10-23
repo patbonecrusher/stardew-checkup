@@ -180,7 +180,7 @@ enum PlainTextRenderer {
         case .storage(let s):
             var out = ""
             for b in s.boxes {
-                out += pad + "  \(b.label) [\(b.items.count)/\(b.capacity)]\(b.color.map { " rgb(\($0.r),\($0.g),\($0.b))" } ?? "")\n"
+                out += pad + "  \(b.label) [\(b.items.count)/\(b.capacity)]\(b.color.map { " rgb(\($0.r),\($0.g),\($0.b))" } ?? "")\(b.directions.map { " — " + $0 } ?? "")\n"
                 for i in b.items { out += pad + "    \(i.name) ×\(i.count)\(i.quality > 0 ? " q\(i.quality)" : "")\n" }
             }
             return out

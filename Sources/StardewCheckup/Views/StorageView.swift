@@ -6,6 +6,8 @@ struct StorageView: View {
     @AppStorage("storage-by-item") private var byItem = false
     @State private var filter = ""
     @State private var hideEmpty = true
+    @State private var selected: String? = nil
+    @AppStorage("storage-show-map") private var showMap = true
 
     private func matches(_ item: StoredItem) -> Bool {
         filter.isEmpty || item.name.localizedCaseInsensitiveContains(filter)
@@ -39,7 +41,10 @@ struct StorageView: View {
                 }
                 .pickerStyle(.segmented).labelsHidden().fixedSize()
                 PlanSearchField(prompt: "Find an item or a chest", text: $filter)
-                if !byItem { Toggle("Hide empty containers", isOn: $hideEmpty).toggleStyle(.checkbox) }
+                if !byItem {
+                    Toggle("Hide empty containers", isOn: $hideEmpty).toggleStyle(.checkbox)
+                    Toggle("Farm map", isOn: $showMap).toggleStyle(.checkbox)
+                }
                 Spacer()
             }
             .font(.callout)
@@ -51,12 +56,32 @@ struct StorageView: View {
     private var boxGrid: some View {
         let list = boxes
         return Group {
+            if showMap {
+                VStack(alignment: .leading, spacing: 4) {
+                    StorageMapView(data: data, highlighted: filter.isEmpty ? [] : Set(list.map(\.id)), selected: $selected)
+                    Text("Click a chest on the map or a card to highlight it. The red door is your front door; chests inside buildings light up their building.")
+                        .font(.caption).foregroundStyle(Theme.secondaryText)
+                }
+                .padding(8)
+                .background(Theme.panelAlt.opacity(0.4), in: RoundedRectangle(cornerRadius: 10))
+            }
+            if let sel = data.boxes.first(where: { $0.id == selected }) {
+                HStack(spacing: 6) {
+                    ChestSwatch(box: sel)
+                    Text(sel.label).font(.callout.weight(.semibold))
+                    if let d = sel.directions { Text("· " + d).font(.callout) }
+                    Spacer()
+                    Button("Clear") { selected = nil }.buttonStyle(.link).font(.caption)
+                }
+                .foregroundStyle(Theme.text)
+            }
             if list.isEmpty {
                 Text("Nothing matches “\(filter)”.").foregroundStyle(Theme.secondaryText)
             }
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 300, maximum: 460), spacing: 8, alignment: .top)], alignment: .leading, spacing: 8) {
                 ForEach(list) { box in
-                    StorageBoxCard(box: box, filter: filter)
+                    StorageBoxCard(box: box, filter: filter, isSelected: box.id == selected)
+                        .onTapGesture { selected = box.id == selected ? nil : box.id }
                 }
             }
         }
@@ -93,6 +118,7 @@ private struct FlowChips: View {
                 .padding(.horizontal, 7).padding(.vertical, 2)
                 .background(Theme.panelAlt.opacity(0.6), in: Capsule())
                 .fixedSize()
+                .help(p.0.directions ?? p.0.label)
             }
         }
     }
@@ -119,6 +145,7 @@ struct ChestSwatch: View {
 private struct StorageBoxCard: View {
     let box: StorageBox
     let filter: String
+    var isSelected = false
     @State private var expanded = false
 
     var body: some View {
@@ -135,6 +162,10 @@ private struct StorageBoxCard: View {
                 Text("\(box.usedSlots)/\(box.capacity)").font(.caption).monospacedDigit()
                     .foregroundStyle(box.usedSlots >= box.capacity ? Theme.no : Theme.secondaryText)
                     .help("Slots used")
+            }
+            if let d = box.directions {
+                Label(d, systemImage: "location.fill").font(.caption).foregroundStyle(Theme.link)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             if box.items.isEmpty {
                 Text("Empty").font(.caption).foregroundStyle(Theme.secondaryText)
@@ -161,6 +192,80 @@ private struct StorageBoxCard: View {
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.panelAlt.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.border.opacity(0.3), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(isSelected ? Theme.yes : Theme.border.opacity(0.3), lineWidth: isSelected ? 2 : 1))
+        .contentShape(Rectangle())
+    }
+}
+
+/// Bird's-eye sketch of the farm: buildings, the front door and every chest standing outside.
+/// Highlighted chests (search matches or the selected one) are drawn larger with a ring.
+struct StorageMapView: View {
+    let data: StorageData
+    let highlighted: Set<String>
+    @Binding var selected: String?
+
+    private var farmBoxes: [StorageBox] { data.boxes.filter { $0.onFarm && $0.tile != nil } }
+
+    /// Tile bounds covering every building and chest, with a margin.
+    private var bounds: (minX: Int, minY: Int, maxX: Int, maxY: Int) {
+        var xs = data.buildings.flatMap { [$0.x, $0.x + $0.w] } + farmBoxes.map { $0.tile!.x }
+        var ys = data.buildings.flatMap { [$0.y, $0.y + $0.h] } + farmBoxes.map { $0.tile!.y }
+        if let d = data.frontDoor { xs.append(d.x); ys.append(d.y) }
+        guard let x0 = xs.min(), let x1 = xs.max(), let y0 = ys.min(), let y1 = ys.max() else { return (0, 0, 80, 65) }
+        return (max(0, x0 - 3), max(0, y0 - 3), x1 + 3, y1 + 3)
+    }
+
+    private static func point(_ tile: CGFloat, _ origin: CGPoint, _ b: (minX: Int, minY: Int, maxX: Int, maxY: Int), _ x: Int, _ y: Int) -> CGPoint {
+        CGPoint(x: origin.x + CGFloat(x - b.minX) * tile, y: origin.y + CGFloat(y - b.minY) * tile)
+    }
+
+    private func color(_ box: StorageBox) -> Color {
+        box.color.map { Color(red: Double($0.r) / 255, green: Double($0.g) / 255, blue: Double($0.b) / 255) }
+            ?? (box.name.contains("Stone") ? Color.gray : Color(red: 0.62, green: 0.40, blue: 0.20))
+    }
+
+    var body: some View {
+        let b = bounds
+        let cols = CGFloat(b.maxX - b.minX + 1), rows = CGFloat(b.maxY - b.minY + 1)
+        GeometryReader { geo in
+            let tile = min(geo.size.width / cols, 12)
+            let origin = CGPoint(x: (geo.size.width - tile * cols) / 2, y: 0)
+            let selectedBox = data.boxes.first { $0.id == selected }
+            ZStack(alignment: .topLeading) {
+                RoundedRectangle(cornerRadius: 8).fill(Color(red: 0.36, green: 0.52, blue: 0.27).opacity(0.35))
+                    .frame(width: tile * cols, height: tile * rows).offset(x: origin.x)
+                ForEach(data.buildings) { bld in
+                    let lit = selectedBox?.location == bld.name
+                    let p = Self.point(tile, origin, b, bld.x, bld.y)
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(bld.name == "Farmhouse" ? Theme.accent.opacity(0.55) : Theme.barTrack.opacity(0.9))
+                        .overlay(RoundedRectangle(cornerRadius: 3).stroke(lit ? Theme.yes : Theme.border.opacity(0.7), lineWidth: lit ? 3 : 1))
+                        .overlay(Text(bld.name).font(.system(size: max(8, min(11, tile))).weight(.semibold))
+                            .foregroundStyle(Theme.text).lineLimit(2).multilineTextAlignment(.center).padding(2))
+                        .frame(width: CGFloat(bld.w) * tile, height: CGFloat(bld.h) * tile)
+                        .offset(x: p.x, y: p.y)
+                }
+                if let d = data.frontDoor {
+                    let p = Self.point(tile, origin, b, d.x, d.y)
+                    Image(systemName: "door.left.hand.open").font(.system(size: tile * 1.1)).foregroundStyle(Theme.no)
+                        .frame(width: tile * 1.6, height: tile * 1.6)
+                        .offset(x: p.x - tile * 0.3, y: p.y - tile * 0.3)
+                        .help("Your front door")
+                }
+                ForEach(farmBoxes) { box in
+                    let p = Self.point(tile, origin, b, box.tile!.x, box.tile!.y)
+                    let on = box.id == selected || highlighted.contains(box.id)
+                    let size = on ? tile * 1.6 : tile * 0.9
+                    RoundedRectangle(cornerRadius: 2).fill(color(box))
+                        .overlay(RoundedRectangle(cornerRadius: 2).stroke(on ? Theme.yes : Color.black.opacity(0.5), lineWidth: on ? 2.5 : 0.5))
+                        .frame(width: size, height: size)
+                        .offset(x: p.x + (tile - size) / 2, y: p.y + (tile - size) / 2)
+                        .opacity(highlighted.isEmpty || on ? 1 : 0.35)
+                        .onTapGesture { selected = box.id }
+                        .help(box.label + (box.directions.map { "\n" + $0 } ?? ""))
+                }
+            }
+        }
+        .frame(height: min(rows * 12, 520))
     }
 }

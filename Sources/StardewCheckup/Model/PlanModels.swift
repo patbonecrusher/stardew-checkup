@@ -180,11 +180,27 @@ struct StorageBox: Identifiable {
     var color: (r: Int, g: Int, b: Int)? = nil
     var capacity: Int = 36
     var items: [StoredItem] = []
+    /// Directions from the farmhouse front door, when it can be worked out.
+    var directions: String? = nil
+    /// Farm building this container is inside, if any (its footprint is highlighted on the map).
+    var building: String? = nil
+    /// True when the tile is on the Farm map itself (drawn on the farm map).
+    var onFarm = false
     var label: String { tile.map { "\(name), \(location) (\($0.x), \($0.y))" } ?? "\(name), \(location)" }
     var usedSlots: Int { items.count }
 }
 
+/// A building's footprint on the farm map.
+struct FarmBuilding: Identifiable {
+    let name: String
+    let x: Int, y: Int, w: Int, h: Int
+    var door: (x: Int, y: Int)? = nil
+    var id: String { "\(name)-\(x)-\(y)" }
+}
+
 struct StorageData {
     var boxes: [StorageBox] = []
+    var buildings: [FarmBuilding] = []
+    var frontDoor: (x: Int, y: Int)? = nil
     var totalStacks: Int { boxes.reduce(0) { $0 + $1.items.count } }
 }
