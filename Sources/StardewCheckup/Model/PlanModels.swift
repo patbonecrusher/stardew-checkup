@@ -204,3 +204,37 @@ struct StorageData {
     var frontDoor: (x: Int, y: Int)? = nil
     var totalStacks: Int { boxes.reduce(0) { $0 + $1.items.count } }
 }
+
+// MARK: Golden Walnuts
+
+/// One golden walnut source, with how many of its walnuts the host has found.
+struct WalnutGuideRow: Identifiable {
+    let id: String
+    let name: String
+    let area: String
+    let total: Int
+    let found: Int
+    let hint: String
+    var isDone: Bool { found >= total }
+}
+
+struct WalnutGuideData {
+    var rows: [WalnutGuideRow]
+    var found: Int
+    var total: Int
+
+    /// Areas in the order you reach them on the island.
+    static let areas = ["Island South", "Island East (Jungle)", "Island North", "Field Office", "Island West", "Island Southeast (Cove)", "Volcano", "Anywhere on the island"]
+
+    static func area(id: String, name: String) -> String {
+        if id.hasPrefix("Volcano") || name.hasPrefix("Volcano") { return "Volcano" }
+        if name.hasPrefix("Field Office") { return "Field Office" }
+        if name.hasPrefix("Island Jungle") || id == "TreeNut" { return "Island East (Jungle)" }
+        if name.hasPrefix("Island Cove") || id == "Darts" { return "Island Southeast (Cove)" }
+        if name.hasPrefix("Island North") || id == "Island_N_BuriedTreasureNut" { return "Island North" }
+        if name.hasPrefix("Island West") || name.hasPrefix("Island Farm") || id.hasPrefix("Island_W_")
+            || ["Birdie", "TigerSlimeNut", "IslandFarming", "MusselStone"].contains(id) { return "Island West" }
+        if name.hasPrefix("Island South") { return "Island South" }
+        return "Anywhere on the island"
+    }
+}

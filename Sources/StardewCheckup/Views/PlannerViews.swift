@@ -502,3 +502,73 @@ struct MonsterPlannerView: View {
         .padding(.leading, 22).padding(.bottom, 4)
     }
 }
+
+// MARK: Golden Walnuts
+
+struct WalnutGuideView: View {
+    let data: WalnutGuideData
+    @State private var showFound = false
+    @State private var filter = ""
+
+    private func rows(_ area: String) -> [WalnutGuideRow] {
+        data.rows.filter { r in
+            r.area == area && (showFound || !r.isDone)
+                && (filter.isEmpty || r.name.localizedCaseInsensitiveContains(filter) || r.hint.localizedCaseInsensitiveContains(filter))
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            let left = data.rows.reduce(0) { $0 + $1.total - $1.found }
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(data.found) of \(data.total) golden walnuts found; \(left) left. Every source is listed by area with where to look.")
+                Text("Coordinates are map tiles (x,y) counted from the top-left corner of that island map. Sources with a count drop several walnuts in total.")
+                    .font(.caption).italic().foregroundStyle(Theme.secondaryText)
+            }
+            .foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 14) {
+                PlanSearchField(prompt: "Search walnuts", text: $filter)
+                Toggle("Show walnuts already found", isOn: $showFound).toggleStyle(.checkbox)
+                Spacer()
+            }
+            .font(.callout)
+            ForEach(WalnutGuideData.areas, id: \.self) { area in
+                let list = rows(area)
+                if !list.isEmpty {
+                    let missing = list.reduce(0) { $0 + $1.total - $1.found }
+                    PlanGroupHeader(title: area, symbol: area == "Volcano" ? "flame.fill" : "mappin.and.ellipse",
+                                    color: missing == 0 ? Theme.yes : Theme.accent, count: missing,
+                                    blurb: missing == 0 ? "All found." : "\(missing) walnut\(missing == 1 ? "" : "s") left here.")
+                    LazyVGrid(columns: cardColumns, alignment: .leading, spacing: 8) {
+                        ForEach(list) { WalnutCard(row: $0) }
+                    }
+                    .padding(.bottom, 4)
+                }
+            }
+        }
+        .padding(.leading, 22).padding(.bottom, 4)
+    }
+}
+
+private struct WalnutCard: View {
+    let row: WalnutGuideRow
+
+    var body: some View {
+        let color = row.isDone ? Theme.yes : (row.found > 0 ? Theme.accent : Theme.no)
+        PlanCard(color: color) {
+            HStack(spacing: 6) {
+                Image(systemName: row.isDone ? "checkmark.circle.fill" : "circle").foregroundStyle(color)
+                Text(row.name).font(.body.weight(.semibold))
+                Spacer()
+                Text(row.total > 1 ? "\(row.found) / \(row.total)" : (row.isDone ? "found" : "1 walnut"))
+                    .font(.caption.weight(.semibold)).monospacedDigit().foregroundStyle(color)
+            }
+            if row.total > 1 {
+                ProgressView(value: Double(row.found), total: Double(row.total)).tint(color)
+            }
+            Text(row.hint).font(.callout).foregroundStyle(Theme.text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .opacity(row.isDone ? 0.7 : 1)
+    }
+}

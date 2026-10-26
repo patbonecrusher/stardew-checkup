@@ -345,6 +345,8 @@ struct Overview {
     var shipPlan: ShipPlanData? = nil
     var cropPlan: CropPlanData? = nil
     var monsterPlan: MonsterPlanData? = nil
+    /// Every golden walnut with its spoiler hint, for the Golden Walnuts tab.
+    var walnutGuide: WalnutGuideData? = nil
 }
 
 enum Block: Identifiable {

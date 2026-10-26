@@ -59,6 +59,12 @@ extension Checkup {
         }
 
         info.perfection.walnuts = CountTotal(count: gameCount, total: count)
+        info.overview.walnutGuide = WalnutGuideData(
+            rows: (allAtOnce + extra + limited).map { g in
+                WalnutGuideRow(id: g.id, name: g.name, area: WalnutGuideData.area(id: g.id, name: g.name),
+                               total: g.num, found: min(found[g.id] ?? 0, g.num), hint: g.hint)
+            },
+            found: gameCount, total: count)
         var ptPct = RichText()
         if info.isAtLeast("1.5") {
             let x = min(100, 100 * Double(gameCount) / Double(count))

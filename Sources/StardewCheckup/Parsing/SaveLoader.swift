@@ -298,6 +298,10 @@ extension PlainTextRenderer {
             out += "== Monsters: mine \(m.mineLevel), skull \(m.skullLevel)\n"
             for r in m.rows { out += "  \(r.goal): \(r.killed)/\(r.target)\(r.isDone ? (r.claimed ? " claimed" : " CLAIM") : "") — \(r.reward)\n" }
         }
+        if let w = o.walnutGuide {
+            out += "== Walnuts: \(w.found)/\(w.total)\n"
+            for r in w.rows { out += "  [\(r.area)] \(r.name): \(r.found)/\(r.total)\(r.isDone ? " done" : "") — \(r.hint.replacingOccurrences(of: "\n", with: "; "))\n" }
+        }
         return out
     }
 }

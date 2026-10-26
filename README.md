@@ -118,7 +118,9 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
 - Multiplayer saves show one column per player, and the bottom bar toggles
   players on and off.
 - Hidden spoilers for Golden Walnut locations appear as tooltips when you
-  hover over "Hover for spoilers".
+  hover over "Hover for spoilers". The Golden Walnuts page also has a
+  Spoilers tab listing every walnut by island area with where to find it,
+  what you have found so far, and a search.
 
 ## Layout
 

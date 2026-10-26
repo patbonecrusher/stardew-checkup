@@ -20,6 +20,7 @@ struct SectionView: View {
         case "Crop_Shipping": return o.cropPlan.map { AnyView(CropPlannerView(data: $0)) }
         case "Museum_Collection": return o.museumPlan.map { AnyView(MuseumPlannerView(data: $0)) }
         case "Monster_Hunting": return o.monsterPlan.map { AnyView(MonsterPlannerView(data: $0)) }
+        case "Golden_Walnuts": return o.walnutGuide.map { AnyView(WalnutGuideView(data: $0)) }
         case "Community_Center___Joja_Community_Development": return o.bundlePlan.map { AnyView(BundlePlannerView(data: $0)) }
         default: return nil
         }
@@ -45,7 +46,11 @@ struct SectionView: View {
             if let planner {
                 Picker("", selection: Binding(get: { showPlanner }, set: { setPlanner($0) })) {
                     Label("Checkup", systemImage: SectionGroup.symbol(for: section.id)).tag(false)
-                    Label("Planner", systemImage: "list.bullet.clipboard").tag(true)
+                    if section.id == "Golden_Walnuts" {
+                        Label("Spoilers", systemImage: "eye").tag(true)
+                    } else {
+                        Label("Planner", systemImage: "list.bullet.clipboard").tag(true)
+                    }
                 }
                 .pickerStyle(.segmented).labelsHidden().fixedSize()
                 .padding(.leading, 4)
