@@ -122,6 +122,18 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   Spoilers tab listing every walnut by island area with where to find it,
   what you have found so far, and a search.
 
+## Save backups
+
+`Tools/stardew-save.sh` backs up and restores saves, with a reason for each
+backup (kept in `~/.config/StardewValley/SaveBackups/<farm>/`):
+
+```sh
+Tools/stardew-save.sh backup "before proposing to Haley"
+Tools/stardew-save.sh list
+Tools/stardew-save.sh restore 2      # quit the game first; the current save is backed up before restoring
+Tools/stardew-save.sh -f stuff list  # pick another farm (defaults to the last one saved)
+```
+
 ## Layout
 
 - `Sources/StardewCheckup/Parsing/` — the port of `stardew-checkup.js`,
