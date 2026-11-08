@@ -184,6 +184,14 @@ enum PlainTextRenderer {
                 for i in b.items { out += pad + "    \(i.name) ×\(i.count)\(i.quality > 0 ? " q\(i.quality)" : "")\n" }
             }
             return out
+        case .scarecrows(let s):
+            var out = ""
+            for r in s.rarecrows {
+                out += pad + "  Rarecrow #\(r.number): " + (r.have ? (r.placed + r.stored).joined(separator: "; ") : "missing — \(r.source)") + "\n"
+            }
+            for c in s.scarecrows { out += pad + "  \(c.name) at \(c.location) (\(c.tile.x), \(c.tile.y)) r\(c.radius)\(c.directions.map { " — " + $0 } ?? "")\n" }
+            out += pad + "  crops on farm: \(s.crops.count), unprotected: \(s.unprotected)\n"
+            return out
         case .eventPlan(let e):
             var out = ""
             for r in e.rows where !r.isComplete {

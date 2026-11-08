@@ -25,6 +25,9 @@ final class Checkup {
     /// and consumed by `parseCharacters`.
     var hostEventStates: [String: MarkState] = [:]
     var hostCharacterStatus: [String: CharacterStatus] = [:]
+    /// Filled by `parseStorage` for `parseScarecrows`: the containers and every scarecrow standing anywhere.
+    var storageData: StorageData? = nil
+    var placedScarecrows: [PlacedScarecrow] = []
     /// Giftable items the host owns (inventory, chests, fridges), filled lazily.
     lazy var hostOwnedItems: [String: OwnedItem] = collectOwnedItems()
     /// The same items keyed by item id, for planners that know the exact item.
@@ -86,6 +89,7 @@ final class Checkup {
         sections.append(timed("parseArcadeGames") { parseArcadeGames() })
         sections.append(timed("parseAnimals") { parseAnimals() })
         sections.append(timed("parseStorage") { parseStorage() })
+        sections.append(timed("parseScarecrows") { parseScarecrows() })
         report.sections = sections.compactMap { $0 }
         report.farmName = info.farmName
         report.playerNames = info.playerOrder.map { info.playerName($0) }

@@ -112,6 +112,8 @@ struct BlockView: View {
             CookingPlannerView(data: data)
         case .storage(let data):
             StorageView(data: data)
+        case .scarecrows(let data):
+            ScarecrowView(data: data)
         }
     }
 

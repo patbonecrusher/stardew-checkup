@@ -168,6 +168,7 @@ struct StoredItem: Identifiable {
     var quality: Int
     /// Item kind for grouping: "Tool", "Weapon", "Ring", "Hat", "Boots", "Clothing", "Furniture" or "Item".
     var kind: String
+    var itemId: String = ""
 }
 
 /// A chest, fridge, auto-grabber or the backpack, with what is inside.
@@ -237,4 +238,57 @@ struct WalnutGuideData {
         if name.hasPrefix("Island South") { return "Island South" }
         return "Anywhere on the island"
     }
+}
+
+// MARK: Scarecrows
+
+/// A scarecrow (plain, deluxe or Rarecrow) standing somewhere.
+struct PlacedScarecrow: Identifiable {
+    let name: String            // "Scarecrow", "Deluxe Scarecrow", "Rarecrow #3"
+    let location: String
+    let tile: (x: Int, y: Int)
+    /// Tiles it protects around itself (8, or 16 for the Deluxe Scarecrow).
+    let radius: Int
+    var directions: String? = nil
+    var id: String { "\(location)-\(tile.x)-\(tile.y)" }
+    var onFarm: Bool { location == "Farm" }
+}
+
+/// One of the eight Rarecrows and where the host's copies are.
+struct RarecrowStatus: Identifiable {
+    let number: Int
+    let source: String
+    var placed: [String] = []   // "Farm (63, 32)"
+    var stored: [String] = []   // "Big Chest, Farm (76, 19)"
+    var id: Int { number }
+    var have: Bool { !placed.isEmpty || !stored.isEmpty }
+}
+
+struct ScarecrowData {
+    var rarecrows: [RarecrowStatus] = []
+    var scarecrows: [PlacedScarecrow] = []
+    /// Crop tiles on the Farm map and whether a scarecrow covers them.
+    var crops: [(x: Int, y: Int, protected: Bool)] = []
+    var buildings: [FarmBuilding] = []
+    var frontDoor: (x: Int, y: Int)? = nil
+    var hasLetter = false
+    var knowsDeluxe = false
+    var deluxeCrafted = 0
+    var unprotected: Int { crops.filter { !$0.protected }.count }
+}
+
+enum RarecrowData {
+    /// Big craftable item id → Rarecrow number.
+    static let numbers: [String: Int] = ["110": 1, "113": 2, "126": 3, "136": 4, "137": 5, "138": 6, "139": 7, "140": 8]
+    /// Where each one comes from (shop data from Data/Shops and Data/MuseumRewards).
+    static let sources: [Int: String] = [
+        1: "Stardew Valley Fair (Fall 16): star token booth, 800 star tokens",
+        2: "Spirit's Eve (Fall 27): Pierre's shop, 5,000g",
+        3: "Casino in the Calico Desert (needs the Club Card from Mr. Qi): 10,000 Qi Coins",
+        4: "Festival of Ice (Winter 8): the traveling merchant, 5,000g. The Traveling Cart also sells it sometimes in fall and winter",
+        5: "Flower Dance (Spring 24): Pierre's shop, 2,500g",
+        6: "The Dwarf's shop in the Mines, 2,500g",
+        7: "Museum reward for donating 20 artifacts (collect it from Gunther's counter). If lost, the Night Market magic boat sells it again",
+        8: "Museum reward for donating 40 items. If lost, the Night Market magic boat sells it again",
+    ]
 }

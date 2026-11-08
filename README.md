@@ -77,6 +77,10 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   to the by-item view for a list of every item and where each stack is.
   Each chest says where it is from your front door ("12 right, 4 down"), and
   a small farm map marks every chest; click one to highlight it.
+- The Scarecrows page tracks the eight Rarecrows (placed, in a chest, or
+  where to get the missing ones), the Rarecrow Society letter with the Deluxe
+  Scarecrow recipe, and a farm map of every scarecrow's range over your crops,
+  with uncovered crops in red.
 - Planner tabs: several pages have a Checkup / Planner switch at the top.
   - Cooking and Crafting: every recipe you haven't made yet, sorted into make
     now (ingredients in your inventory or fridge), fetch from storage first,

@@ -28,7 +28,11 @@ extension Checkup {
                 case "Trinket": kind = "Trinket"
                 default: kind = "Item"
                 }
-                return StoredItem(name: name, count: max(1, num(item.childText("stack"))), quality: num(item.childText("quality")), kind: kind)
+                let itemId = item.childText("itemId").isEmpty ? item.childText("parentSheetIndex") : item.childText("itemId")
+                // All eight Rarecrows share one name; tell them apart by item id.
+                let isBig = item.childText("category") == "-9" || item.childText("bigCraftable") == "true"
+                let shown = isBig && name == "Rarecrow" ? RarecrowData.numbers[itemId].map { "Rarecrow #\($0)" } ?? name : name
+                return StoredItem(name: shown, count: max(1, num(item.childText("stack"))), quality: num(item.childText("quality")), kind: kind, itemId: itemId)
             }
         }
         func color(of chest: XNode) -> (Int, Int, Int)? {
@@ -90,6 +94,12 @@ extension Checkup {
             for entry in loc.child("objects")?.children("item") ?? [] {
                 guard let obj = entry.first("value > Object") else { continue }
                 let tile = (num(entry.text("key > Vector2 > X")), num(entry.text("key > Vector2 > Y")))
+                if let crow = scarecrow(obj, location: display, tile: tile) {
+                    var c = crow
+                    c.directions = directions(StorageBox(id: "", name: c.name, location: display, tile: tile), building: building, door: data.frontDoor)
+                    placedScarecrows.append(c)
+                    continue
+                }
                 var chest: XNode? = nil
                 var name = obj.childText("name")
                 if obj.attr(xsi) == "Chest" {
@@ -114,6 +124,7 @@ extension Checkup {
             }
         }
 
+        storageData = data
         let containers = data.boxes.count - 1
         // Number duplicate building names on the map the same way as the container locations.
         var mapCounter: [String: Int] = [:]
@@ -133,8 +144,21 @@ extension Checkup {
         return section
     }
 
+    /// A scarecrow standing at `tile`, if `obj` is one.
+    private func scarecrow(_ obj: XNode, location: String, tile: (Int, Int)) -> PlacedScarecrow? {
+        let name = obj.childText("name")
+        guard obj.childText("category") == "-9" || obj.childText("bigCraftable") == "true" else { return nil }
+        let id = obj.childText("itemId").isEmpty ? obj.childText("parentSheetIndex") : obj.childText("itemId")
+        switch name {
+        case "Scarecrow": return PlacedScarecrow(name: name, location: location, tile: tile, radius: 8)
+        case "Deluxe Scarecrow": return PlacedScarecrow(name: name, location: location, tile: tile, radius: 16)
+        case "Rarecrow": return PlacedScarecrow(name: RarecrowData.numbers[id].map { "Rarecrow #\($0)" } ?? name, location: location, tile: tile, radius: 8)
+        default: return nil
+        }
+    }
+
     /// "12 right, 4 down from your front door" style directions for a container.
-    private func directions(_ box: StorageBox, building: FarmBuilding?, door: (x: Int, y: Int)?) -> String? {
+    func directions(_ box: StorageBox, building: FarmBuilding?, door: (x: Int, y: Int)?) -> String? {
         func offset(_ x: Int, _ y: Int) -> String? {
             guard let door else { return nil }
             let dx = x - door.x, dy = y - door.y
