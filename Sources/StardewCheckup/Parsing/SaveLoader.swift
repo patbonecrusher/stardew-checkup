@@ -275,6 +275,13 @@ extension PlainTextRenderer {
                 out += "  [\(g)] " + rows.map { $0.fish.name + ($0.nextSeason.isEmpty ? "" : " (\($0.nextSeason))") + ($0.blockers.isEmpty ? "" : " {\($0.blockers.joined(separator: "; "))}") }.joined(separator: ", ") + "\n"
             }
         }
+        if let f = o.fishPlan, !f.needs.isEmpty {
+            out += "== Fish needed elsewhere\n"
+            for r in f.needs {
+                out += "  \(r.fish.name): have \(r.have), to catch \(r.toCatch)\(r.qualityShort ? " (quality short)" : "")\(r.caughtBefore ? "" : " NEVER CAUGHT") [\(f.catchInfo[r.fish.name].map { "\($0.group)" } ?? "?")]\n"
+                for n in r.needs { out += "    \(n.kind.rawValue): \(n.purpose) ×\(n.count)\(n.qualityLabel.map { " " + $0 } ?? "")\(n.note.map { " (" + $0 + ")" } ?? "")\n" }
+            }
+        }
         if let c = o.craftPlan {
             out += "== Crafting\n"
             for r in c.rows where r.state != .cooked {

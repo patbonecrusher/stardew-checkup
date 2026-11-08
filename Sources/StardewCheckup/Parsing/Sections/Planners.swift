@@ -192,11 +192,11 @@ extension Checkup {
         for fish in FishData.all {
             if fish.note.contains("Extended Family") && !extendedFamily { continue }
             data.total += 1
-            if caught.contains(fish.name) { data.caught += 1; continue }
             var row = FishPlanRow(fish: fish, group: .laterSeason)
             if fish.crabPot {
                 row.group = .crabPot
-                data.rows.append(row)
+                data.catchInfo[fish.name] = row
+                if caught.contains(fish.name) { data.caught += 1 } else { data.rows.append(row) }
                 continue
             }
             let locs = fish.location.components(separatedBy: ", ")
@@ -219,9 +219,75 @@ extension Checkup {
             } else {
                 row.group = .laterSeason
             }
-            data.rows.append(row)
+            data.catchInfo[fish.name] = row
+            if caught.contains(fish.name) { data.caught += 1 } else { data.rows.append(row) }
         }
         return data
+    }
+
+    /// Fish still wanted by an unmade recipe, an unfinished bundle or an open quest.
+    func buildFishNeeds() -> [FishNeedRow] {
+        let fishByName = Dictionary(FishData.all.map { ($0.name, $0) }, uniquingKeysWith: { a, _ in a })
+        var rows: [String: FishNeedRow] = [:]
+        func add(_ name: String, _ need: FishNeed) {
+            guard let fish = fishByName[name] else { return }
+            rows[name, default: FishNeedRow(fish: fish)].needs.append(need)
+        }
+        for (plan, kind) in [(info.overview.cookPlan, FishNeed.Kind.cooking), (info.overview.craftPlan, .crafting)] {
+            for r in plan?.rows ?? [] where r.state != .cooked {
+                for ing in r.ingredients {
+                    add(ing.name, FishNeed(kind: kind, purpose: r.name, count: ing.need, note: r.known ? nil : "recipe not learned yet"))
+                }
+            }
+        }
+        if let bundles = info.overview.bundlePlan, !bundles.isJoja {
+            for b in bundles.rows where b.state != .done {
+                let open = b.items.filter { !$0.done && !$0.isMoney }.count
+                let choice = open > b.left ? "any \(b.left) of \(open) items" : nil
+                for item in b.items where !item.done {
+                    add(item.name, FishNeed(kind: .bundle, purpose: "\(b.name) (\(b.room))", count: item.need, quality: item.quality, note: choice))
+                }
+            }
+        }
+        // Open delivery and fishing quests from the bulletin board or villagers.
+        for q in hostPlayer.child("questLog")?.children("Quest") ?? [] where q.childText("completed") != "true" {
+            let type = q.attr("\(info.nsPrefix):type") ?? ""
+            let target = q.childText("target")
+            if type == "ItemDeliveryQuest" {
+                let id = q.childText("item").replacingOccurrences(of: "(O)", with: "")
+                if let name = ObjectData.objects[id] {
+                    add(name, FishNeed(kind: .quest, purpose: "Deliver to \(target.isEmpty ? "a villager" : target)", count: max(1, num(q.childText("number"))),
+                                       note: q.childText("accepted") == "true" ? nil : "not accepted yet"))
+                }
+            } else if type == "FishingQuest" {
+                var id = q.childText("ItemId")
+                if id.isEmpty { id = q.childText("whichFish") }
+                id = id.replacingOccurrences(of: "(O)", with: "")
+                let left = num(q.childText("numberToFish")) - num(q.childText("numberFished"))
+                if let name = ObjectData.objects[id], left > 0 {
+                    add(name, FishNeed(kind: .quest, purpose: "Catch for \(target.isEmpty ? "a villager" : target)", count: left,
+                                       note: "must be caught, not taken from a chest"))
+                }
+            }
+        }
+        let caught = info.overview.fishCaught
+        var out: [FishNeedRow] = []
+        for (name, var row) in rows {
+            if let owned = hostOwnedItems[name] {
+                row.have = owned.count
+                row.places = owned.placeSummary
+                row.qualityShort = row.needs.contains { $0.quality > 0 && owned.count(atLeast: $0.quality) < $0.count }
+            } else {
+                row.qualityShort = row.needs.contains { $0.quality > 0 }
+            }
+            row.caughtBefore = caught.contains(name)
+            out.append(row)
+        }
+        return out.sorted { a, b in
+            let aShort = a.toCatch > 0 || a.qualityShort, bShort = b.toCatch > 0 || b.qualityShort
+            if aShort != bShort { return aShort }
+            return a.needs.count != b.needs.count ? a.needs.count > b.needs.count : a.fish.name < b.fish.name
+        }
     }
 
     // MARK: Crafting

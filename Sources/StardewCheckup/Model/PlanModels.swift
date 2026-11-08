@@ -75,6 +75,38 @@ struct FishPlanData {
     var rows: [FishPlanRow] = []
     var caught = 0
     var total = 0
+    /// When and where every fish can be caught (caught ones too), keyed by name.
+    var catchInfo: [String: FishPlanRow] = [:]
+    /// Fish that recipes, bundles and quests still ask for.
+    var needs: [FishNeedRow] = []
+}
+
+/// One thing that still needs a fish: a recipe, a bundle slot or a quest.
+struct FishNeed: Identifiable {
+    enum Kind: String { case cooking = "Cooking", crafting = "Crafting", bundle = "Bundle", quest = "Quest" }
+    let kind: Kind
+    let purpose: String
+    let count: Int
+    var quality = 0
+    var note: String? = nil
+    let id = UUID()
+    var qualityLabel: String? { [1: "Silver", 2: "Gold", 4: "Iridium"][quality] }
+}
+
+struct FishNeedRow: Identifiable {
+    let fish: FishInfo
+    var needs: [FishNeed] = []
+    var have = 0
+    var places = ""
+    var caughtBefore = false
+    var id: String { fish.name }
+    /// Copies still to catch so every need can be met (needs are counted separately).
+    var toCatch: Int {
+        let total = needs.reduce(0) { $0 + $1.count }
+        return max(0, total - have)
+    }
+    /// True when some need asks for a better quality than you own.
+    var qualityShort = false
 }
 
 // MARK: Museum

@@ -93,6 +93,9 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   - Fishing: uncaught fish you can catch today given the season and today's
     rain, the ones waiting for the other weather or a later season, and the
     ones still locked (mine floor, Rusty Key, Ginger Island, fishing level).
+    A "Needed for other goals" group lists fish that unmade recipes, unfinished
+    bundles and open delivery or fishing quests still ask for, with how many you
+    own and when you can catch them.
   - Museum: artifacts and minerals you own and can donate now, ones you found
     once but no longer have, and where to look for the rest.
   - Shipping and Crop Shipping: items you own but never shipped, and for

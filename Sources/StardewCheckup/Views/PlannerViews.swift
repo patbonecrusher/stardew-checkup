@@ -225,6 +225,21 @@ struct FishPlannerView: View {
             }
             .foregroundStyle(Theme.text).fixedSize(horizontal: false, vertical: true)
             PlanSearchField(prompt: "Search fish or locations", text: $filter).font(.callout)
+            let needs = data.needs.filter { filter.isEmpty || $0.fish.name.localizedCaseInsensitiveContains(filter) || $0.needs.contains { $0.purpose.localizedCaseInsensitiveContains(filter) } }
+            if !needs.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    PlanGroupHeader(title: "Needed for other goals", symbol: "target", color: Theme.link, count: needs.count,
+                                    blurb: "Fish an unmade recipe, an unfinished Community Center bundle or an open quest still asks for, and how many you own. Fish you still need to catch come first.")
+                    LazyVGrid(columns: cardColumns, alignment: .leading, spacing: 8) {
+                        ForEach(needs) { row in
+                            PlanCard(color: row.toCatch > 0 || row.qualityShort ? Theme.accent : Theme.yes) {
+                                FishNeedCard(row: row, when: data.catchInfo[row.fish.name], isRaining: data.isRaining)
+                            }
+                        }
+                    }
+                }
+                .padding(.bottom, 4)
+            }
             ForEach(groups, id: \.0) { g, title, symbol, color, blurb in
                 let list = rows(g)
                 if !list.isEmpty {
@@ -241,6 +256,65 @@ struct FishPlannerView: View {
             }
         }
         .padding(.leading, 22).padding(.bottom, 4)
+    }
+}
+
+private struct FishNeedCard: View {
+    let row: FishNeedRow
+    let when: FishPlanRow?
+    let isRaining: Bool
+
+    private func symbol(_ k: FishNeed.Kind) -> String {
+        switch k {
+        case .cooking: return "fork.knife"
+        case .crafting: return "hammer"
+        case .bundle: return "building.2"
+        case .quest: return "scroll"
+        }
+    }
+
+    /// When you can catch it, from the Fish planner's own grouping.
+    private var catchLine: (String, String, Color)? {
+        guard let w = when else { return nil }
+        switch w.group {
+        case .today: return ("Can be caught today", "fish.fill", Theme.yes)
+        case .otherWeather: return (isRaining ? "In season, needs a dry day" : "In season, needs rain", isRaining ? "sun.max.fill" : "cloud.rain.fill", Theme.accent)
+        case .laterSeason: return ("Next in " + (w.nextSeason.isEmpty ? "another season" : w.nextSeason), "calendar", Theme.link)
+        case .blocked: return ("Locked: " + w.blockers.joined(separator: "; "), "lock.fill", Theme.no)
+        case .crabPot: return ("Crab pot, any day", "basket.fill", Theme.secondaryText)
+        }
+    }
+
+    var body: some View {
+        let short = row.toCatch > 0 || row.qualityShort
+        HStack(spacing: 6) {
+            WikiName(name: row.fish.name).font(.body.weight(.semibold))
+            if !row.caughtBefore {
+                Text("never caught").font(.caption2.weight(.semibold)).foregroundStyle(Theme.no)
+                    .padding(.horizontal, 5).padding(.vertical, 1).background(Theme.no.opacity(0.15), in: Capsule())
+            }
+            Spacer()
+            Text(row.toCatch > 0 ? "have \(row.have), catch \(row.toCatch) more" : (row.qualityShort ? "have \(row.have), quality too low" : "have \(row.have), enough"))
+                .font(.caption.weight(.semibold)).monospacedDigit().foregroundStyle(short ? Theme.accent : Theme.yes)
+        }
+        ForEach(row.needs) { n in
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Image(systemName: symbol(n.kind)).font(.caption).foregroundStyle(Theme.secondaryText).frame(width: 14)
+                (Text(n.kind.rawValue + ": ").foregroundColor(Theme.secondaryText) + Text(n.purpose).foregroundColor(Theme.text)
+                 + Text(" ×\(n.count)" + (n.qualityLabel.map { ", \($0) or better" } ?? "")).foregroundColor(Theme.secondaryText)
+                 + Text(n.note.map { " (\($0))" } ?? "").foregroundColor(Theme.secondaryText).italic())
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        if let (text, sym, color) = catchLine {
+            Label(text, systemImage: sym).font(.caption).foregroundStyle(color).fixedSize(horizontal: false, vertical: true)
+        }
+        Label(row.fish.location, systemImage: "mappin.and.ellipse").font(.caption).foregroundStyle(Theme.secondaryText)
+            .fixedSize(horizontal: false, vertical: true)
+        if !row.places.isEmpty {
+            Label(row.places, systemImage: "shippingbox").font(.caption).foregroundStyle(Theme.secondaryText).lineLimit(2)
+        }
     }
 }
 

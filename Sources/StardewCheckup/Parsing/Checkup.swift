@@ -81,6 +81,7 @@ final class Checkup {
         sections.append(timed("parseJournalScraps") { parseJournalScraps() })
         sections.append(timed("parseBundles") { parseBundles() })
         _ = timed("parseBundlePlanner") { info.overview.bundlePlan = buildBundlePlan(); return nil }
+        _ = timed("parseFishNeeds") { let needs = buildFishNeeds(); info.overview.fishPlan?.needs = needs; return nil }
         sections.append(timed("parseRaccoons") { parseRaccoons() })
         sections.append(timed("parseGrandpa") { parseGrandpa() })
         sections.append(timed("parseWalnuts") { parseWalnuts() })
