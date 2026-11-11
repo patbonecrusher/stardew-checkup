@@ -186,6 +186,56 @@ extension Checkup {
 
     // MARK: Forest Neighbors (1.6)
 
+    /// The raccoons' next (or current) request, with what the host owns towards it.
+    private func raccoonPlan(timesFed: Int, lastFed: Int) -> RaccoonPlanData? {
+        guard let gameId = UInt64(doc.text("SaveGame > uniqueIDForThisGame")) else { return nil }
+        let seasons = ["Spring", "Summer", "Fall", "Winter"]
+        let seasonIndex = seasons.firstIndex(of: capitalize(doc.text("currentSeason"))) ?? 0
+        let today = (num(doc.text("year")) - 1) * 112 + seasonIndex * 28 + num(doc.text("dayOfMonth")) - 1
+        let waitDays = timesFed == 0 ? 0 : max(0, lastFed + 7 - today)
+        // The season list is picked when the request is first opened: days 22-28 already use the next season.
+        func requestSeason(on total: Int) -> Int { (total % 112 / 28 + (total % 28 + 1 > 21 ? 1 : 0)) % 4 }
+        let saved = Int(doc.text("SaveGame > seasonOfCurrentRaccoonBundle")) ?? -1
+        let locked = saved >= 0
+        let openDay = today + waitDays
+        let season = locked ? saved : requestSeason(on: openDay)
+        let request = RaccoonData.request(gameId: gameId, timesFed: timesFed, season: season)
+        let delivered = doc.find("SaveGame > raccoonBundles > boolean").map { $0.text == "true" }
+
+        var note: String? = nil
+        if !locked && RaccoonData.isSeasonal(request.kind) {
+            // When the request would change if opened in the next season window.
+            let nextWindow = openDay + (openDay % 28 + 1 > 21 ? 28 - openDay % 28 + 21 : 21 - openDay % 28)
+            let other = RaccoonData.request(gameId: gameId, timesFed: timesFed, season: requestSeason(on: nextWindow))
+            let names = { (r: (kind: Int, wants: [RaccoonWant])) in r.wants.map { "\($0.name) ×\($0.count)" }.joined(separator: " and ") }
+            let windowStart = nextWindow % 112 / 28
+            let label = "\(seasons[windowStart]) \(nextWindow % 28 + 1)"
+            note = "The season's list is picked the first time you open the request: days 1-21 use the current season, 22-28 the next one."
+            if names(other) != names(request) {
+                note! += " If you first open it on \(label) or later, they will ask for \(names(other)) instead."
+            }
+        }
+
+        let rows = request.wants.enumerated().map { i, want -> RaccoonItemRow in
+            let owned = ownedCount { item in
+                if want.itemId == "-5" { return item.childText("category") == "-5" }
+                let id = item.childText("itemId").isEmpty ? item.childText("parentSheetIndex") : item.childText("itemId")
+                guard id == want.itemId, item.childText("isRecipe") != "true" else { return false }
+                return want.preserveOf == nil || item.childText("preservedParentSheetIndex") == want.preserveOf
+            }
+            let base = want.preserveOf.map { baseId in
+                ownedCount { item in
+                    let id = item.childText("itemId").isEmpty ? item.childText("parentSheetIndex") : item.childText("itemId")
+                    return id == baseId && item.childText("isRecipe") != "true"
+                }
+            } ?? (count: 0, places: "")
+            return RaccoonItemRow(want: want, delivered: locked && i < delivered.count && delivered[i], have: owned.count, places: owned.places,
+                                  baseHave: base.count, basePlaces: base.places)
+        }
+        return RaccoonPlanData(requestNumber: timesFed + 1, rows: rows, waitDays: waitDays, seasonName: seasons[season],
+                               seasonLocked: locked, seasonNote: note)
+    }
+
     func parseRaccoons() -> Section? {
         let version = "1.6"
         if info.isBefore(version) { return nil }
@@ -219,6 +269,9 @@ extension Checkup {
             ach = Fmt.achieve("Good Neighbors", "help your forest neighbors grow their family", false) + "to help \(9 - timesFed) more times"
         }
         cell.summary.append(.achList([ach.progress(min(timesFed, 9), 9)]))
+        if host.hasMail("raccoonMovedIn"), let plan = raccoonPlan(timesFed: timesFed, lastFed: lastFed) {
+            cell.summary.append(.raccoon(plan))
+        }
         section.globalCells = [cell]
         return section
     }

@@ -324,3 +324,28 @@ enum RarecrowData {
         8: "Museum reward for donating 40 items. If lost, the Night Market magic boat sells it again",
     ]
 }
+
+/// One of the two items in the forest neighbors' current request.
+struct RaccoonItemRow: Identifiable {
+    var id: String { want.itemId + (want.preserveOf ?? "") }
+    let want: RaccoonWant
+    let delivered: Bool
+    let have: Int
+    let places: String
+    /// For a flavoured product: how many of the base item you own.
+    let baseHave: Int
+    let basePlaces: String
+    var enough: Bool { have >= want.count }
+}
+
+/// What Mr. and Mrs. Raccoon want next (Forest Neighbors).
+struct RaccoonPlanData {
+    let requestNumber: Int
+    let rows: [RaccoonItemRow]
+    /// Days until they can be helped again (0 = now).
+    let waitDays: Int
+    let seasonName: String
+    /// The season list is fixed once the request has been opened.
+    let seasonLocked: Bool
+    let seasonNote: String?
+}

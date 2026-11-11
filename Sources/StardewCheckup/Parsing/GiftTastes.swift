@@ -233,6 +233,36 @@ extension Checkup {
         return owned
     }
 
+    /// Counts the host's items (backpack, chests, fridges) that pass `matches`, with where they are.
+    func ownedCount(where matches: (XNode) -> Bool) -> (count: Int, places: String) {
+        var total = 0
+        var places: [String: Int] = [:]
+        func add(_ item: XNode, _ place: String) {
+            guard matches(item) else { return }
+            let n = max(1, num(item.childText("stack")))
+            total += n
+            places[place, default: 0] += n
+        }
+        func location(_ node: XNode) -> String {
+            var cur = node.parent
+            while let n = cur {
+                if n.name == "GameLocation" || n.name == "indoors", !n.childText("name").isEmpty { return " (\(n.childText("name")))" }
+                cur = n.parent
+            }
+            return ""
+        }
+        for item in hostPlayer.find("items > Item") { add(item, "Backpack") }
+        for chest in doc.find("[@\(info.nsPrefix):type='Chest']") {
+            let kind = chest.childText("name")
+            for item in chest.find("items > Item") { add(item, (kind == "Chest" || kind.isEmpty ? "Chest" : kind) + location(chest)) }
+        }
+        for fridge in doc.find("fridge") {
+            for item in fridge.find("items > Item") { add(item, "Fridge" + location(fridge)) }
+        }
+        let text = places.sorted { $0.value > $1.value }.map { "\($0.key) ×\($0.value)" }.joined(separator: ", ")
+        return (total, text)
+    }
+
     /// Loved / liked items the host owns, for one villager, best first.
     func giftSuggestions(for info: CharacterInfo, owned: [String: OwnedItem]) -> GiftSuggestions {
         var loves: [GiftSuggestion] = []

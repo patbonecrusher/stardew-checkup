@@ -114,6 +114,8 @@ struct BlockView: View {
             StorageView(data: data)
         case .scarecrows(let data):
             ScarecrowView(data: data)
+        case .raccoon(let data):
+            RaccoonRequestView(data: data)
         }
     }
 

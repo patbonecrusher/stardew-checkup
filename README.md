@@ -77,6 +77,10 @@ swift run StardewCheckup --dump ~/.config/StardewValley/Saves/Name_123456789/Nam
   to the by-item view for a list of every item and where each stack is.
   Each chest says where it is from your front door ("12 right, 4 down"), and
   a small farm map marks every chest; click one to highlight it.
+- Forest Neighbors shows what Mr. and Mrs. Raccoon will ask for next, worked
+  out the same way the game picks it (seeded by your game id and how many times
+  you have helped them). It lists how many of each item you own and where, how
+  to make the preserves, and where to find the rest.
 - The Scarecrows page tracks the eight Rarecrows (placed, in a chest, or
   where to get the missing ones), the Rarecrow Society letter with the Deluxe
   Scarecrow recipe, and a farm map of every scarecrow's range over your crops,

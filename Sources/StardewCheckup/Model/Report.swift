@@ -365,6 +365,7 @@ enum Block: Identifiable {
     case cookPlan(CookPlanData)                             // cooking planner
     case storage(StorageData)                               // chests and their contents
     case scarecrows(ScarecrowData)                          // Rarecrows and crop coverage
+    case raccoon(RaccoonPlanData)                           // forest neighbors' current request
 
     var id: String {
         switch self {
@@ -382,6 +383,7 @@ enum Block: Identifiable {
         case .cookPlan(let c): return "k\(c.rows.map { "\($0.name)\($0.state)" }.joined())"
         case .storage(let s): return "s\(s.boxes.count)\(s.totalStacks)"
         case .scarecrows(let s): return "q\(s.scarecrows.count)\(s.crops.count)\(s.unprotected)"
+        case .raccoon(let r): return "o\(r.requestNumber)\(r.rows.map { "\($0.id)\($0.have)\($0.delivered)" }.joined())"
         case .eventPlan(let e): return "v\(e.rows.map { "\($0.name)\($0.points)\($0.seenCount)" }.joined())"
         }
     }

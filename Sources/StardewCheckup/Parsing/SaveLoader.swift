@@ -192,6 +192,15 @@ enum PlainTextRenderer {
             for c in s.scarecrows { out += pad + "  \(c.name) at \(c.location) (\(c.tile.x), \(c.tile.y)) r\(c.radius)\(c.directions.map { " — " + $0 } ?? "")\n" }
             out += pad + "  crops on farm: \(s.crops.count), unprotected: \(s.unprotected)\n"
             return out
+        case .raccoon(let r):
+            var out = pad + "  Request #\(r.requestNumber) (\(r.seasonName)\(r.seasonLocked ? ", locked" : "")), wait \(r.waitDays) days\n"
+            for row in r.rows {
+                out += pad + "    \(row.want.name) ×\(row.want.count): \(row.delivered ? "delivered" : "have \(row.have)\(row.places.isEmpty ? "" : " (\(row.places))")")\n"
+                if let recipe = row.want.recipe { out += pad + "      make: \(recipe); base have \(row.baseHave) \(row.basePlaces)\n" }
+                if let hint = RaccoonData.whereToGet(row.want.preserveOf ?? row.want.itemId) { out += pad + "      where: \(hint)\n" }
+            }
+            if let n = r.seasonNote { out += pad + "  \(n)\n" }
+            return out
         case .eventPlan(let e):
             var out = ""
             for r in e.rows where !r.isComplete {
